@@ -1,0 +1,68 @@
+groups:
+  - name: umbrella_alerts
+    rules:
+      # High Error Rate Alert
+      - alert: HighErrorRate
+        expr: |
+          rate(umbrella_errors_total[5m]) > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: "Service {{ $labels.service }} is experiencing high error rate: {{ $value }}"
+
+      # Service Latency Alert
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, rate(umbrella_request_duration_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High latency detected
+          description: "Service {{ $labels.service }} endpoint {{ $labels.endpoint }} has 95th percentile latency above 2s"
+
+      # Service Health Alert
+      - alert: ServiceUnhealthy
+        expr: |
+          up{job="umbrella_services"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Service is down
+          description: "Service {{ $labels.instance }} is down"
+
+      # High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          process_resident_memory_bytes / 1024 / 1024 > 1024  # > 1GB
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage detected
+          description: "Service {{ $labels.service }} is using more than 1GB of memory"
+
+      # Request Rate Alert
+      - alert: HighRequestRate
+        expr: |
+          rate(umbrella_requests_total[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High request rate detected
+          description: "Service {{ $labels.service }} is receiving more than 100 requests per second"
+
+      # Dependency Health Alert
+      - alert: DependencyUnhealthy
+        expr: |
+          sum by(service) (umbrella_dependency_health) < 1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: Service dependency unhealthy
+          description: "Service {{ $labels.service }} has unhealthy dependencies" 

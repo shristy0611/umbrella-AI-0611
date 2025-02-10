@@ -1,0 +1,40 @@
+{{ define "slack.title" }}
+[{{ .Status | toUpper }}{{ if eq .Status "firing" }}:{{ .Alerts.Firing | len }}{{ end }}] {{ .CommonLabels.alertname }}
+{{ end }}
+
+{{ define "slack.text" }}
+{{ range .Alerts }}
+*Alert:* {{ .Labels.alertname }}
+*Service:* {{ .Labels.service }}
+*Severity:* {{ .Labels.severity }}
+*Description:* {{ .Annotations.description }}
+*Value:* {{ .Annotations.value }}
+*Started:* {{ .StartsAt | since }}
+{{ if .EndsAt }}*Ended:* {{ .EndsAt | since }}{{ end }}
+{{ end }}
+{{ end }}
+
+{{ define "email.subject" }}
+[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }} - {{ .CommonLabels.service }}
+{{ end }}
+
+{{ define "email.html" }}
+<!DOCTYPE html>
+<html>
+<body>
+<h2>{{ .Status | toUpper }}: {{ .CommonLabels.alertname }}</h2>
+{{ range .Alerts }}
+<h3>Alert Details</h3>
+<table>
+  <tr><td><b>Service:</b></td><td>{{ .Labels.service }}</td></tr>
+  <tr><td><b>Severity:</b></td><td>{{ .Labels.severity }}</td></tr>
+  <tr><td><b>Description:</b></td><td>{{ .Annotations.description }}</td></tr>
+  <tr><td><b>Value:</b></td><td>{{ .Annotations.value }}</td></tr>
+  <tr><td><b>Started:</b></td><td>{{ .StartsAt | since }}</td></tr>
+  {{ if .EndsAt }}<tr><td><b>Ended:</b></td><td>{{ .EndsAt | since }}</td></tr>{{ end }}
+</table>
+<hr>
+{{ end }}
+</body>
+</html>
+{{ end }} 

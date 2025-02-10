@@ -1,0 +1,152 @@
+name: UMBRELLA-AI Test Suite
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+env:
+  PYTHON_VERSION: "3.9"
+  GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+  GEMINI_API_KEY_OCR: ${{ secrets.GEMINI_API_KEY_OCR }}
+  GEMINI_API_KEY_CHAT: ${{ secrets.GEMINI_API_KEY_CHAT }}
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils tesseract-ocr
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install pytest-github-actions-annotate-failures
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and start services
+        run: |
+          docker-compose build
+          docker-compose up -d
+
+      - name: Wait for services
+        run: |
+          sleep 30  # Allow time for services to start
+          docker ps -a  # Log container status
+
+      - name: Run unit tests
+        run: |
+          pytest tests/unit -v --junitxml=test-reports/unit-tests.xml
+
+      - name: Run integration tests
+        run: |
+          pytest tests/integration -v --junitxml=test-reports/integration-tests.xml
+
+      - name: Run E2E tests
+        run: |
+          pytest tests/e2e -v --junitxml=test-reports/e2e-tests.xml
+
+      - name: Generate coverage report
+        run: |
+          pytest --cov=src --cov=shared --cov-report=xml:test-reports/coverage.xml --cov-report=html:test-reports/coverage-html
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-reports/*.xml
+            test-reports/coverage-html
+
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v3
+        if: always()
+        with:
+          report_paths: 'test-reports/*.xml'
+          detailed_summary: true
+          include_passed: true
+
+      - name: Stop services
+        if: always()
+        run: docker-compose down
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install linting dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install black flake8 isort mypy
+
+      - name: Run black
+        run: black . --check
+
+      - name: Run flake8
+        run: flake8 .
+
+      - name: Run isort
+        run: isort . --check-only --diff
+
+      - name: Run mypy
+        run: mypy src/ shared/
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install security scanning tools
+        run: |
+          python -m pip install --upgrade pip
+          pip install bandit safety
+
+      - name: Run bandit
+        run: bandit -r src/ shared/ -f json -o test-reports/bandit-report.json
+
+      - name: Check dependencies for known vulnerabilities
+        run: safety check
+
+      - name: Upload security scan results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: security-scan-results
+          path: test-reports/bandit-report.json 

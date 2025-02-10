@@ -1,0 +1,203 @@
+version: '3.8'
+
+# Base services configuration
+x-service-base: &service-base
+  restart: unless-stopped
+  networks:
+    - umbrella_network
+  logging:
+    driver: json-file
+    options:
+      max-size: "10m"
+      max-file: "3"
+
+services:
+  # Orchestrator Service
+  orchestrator:
+    <<: *service-base
+    build:
+      context: .
+      dockerfile: orchestrator_service/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - mongodb
+      - redis
+      - otel-collector
+
+  # PDF Extraction Service
+  pdf_extraction:
+    <<: *service-base
+    build:
+      context: .
+      dockerfile: pdf_extraction_service/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - GEMINI_API_KEY_OCR=${GEMINI_API_KEY_OCR}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - otel-collector
+
+  # Sentiment Analysis Service
+  sentiment_analysis:
+    <<: *service-base
+    build:
+      context: .
+      dockerfile: sentiment_service/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - otel-collector
+
+  # Chatbot Service
+  chatbot:
+    <<: *service-base
+    build:
+      context: .
+      dockerfile: chatbot_service/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - GEMINI_API_KEY_CHAT=${GEMINI_API_KEY_CHAT}
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - otel-collector
+      - vector_db
+
+  # RAG Scraper Service
+  rag_scraper:
+    <<: *service-base
+    build:
+      context: .
+      dockerfile: rag_scraper_service/Dockerfile
+    ports:
+      - "8004:8004"
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    depends_on:
+      - otel-collector
+      - vector_db
+
+  # Vector DB Service
+  vector_db:
+    <<: *service-base
+    build:
+      context: .
+      dockerfile: vector_db/Dockerfile
+    ports:
+      - "8005:8005"
+    environment:
+      - ENVIRONMENT=staging
+      - LOG_LEVEL=INFO
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
+    volumes:
+      - vector_data:/app/data
+    depends_on:
+      - otel-collector
+
+  # MongoDB
+  mongodb:
+    <<: *service-base
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+
+  # Redis
+  redis:
+    <<: *service-base
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  # Include observability stack
+  jaeger:
+    <<: *service-base
+    image: jaegertracing/all-in-one:latest
+    ports:
+      - "16686:16686"
+      - "14250:14250"
+      - "14268:14268"
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+  otel-collector:
+    <<: *service-base
+    image: otel/opentelemetry-collector:latest
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./config/otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    ports:
+      - "4317:4317"
+      - "4318:4318"
+    depends_on:
+      - jaeger
+
+  prometheus:
+    <<: *service-base
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./config/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./config/prometheus/rules:/etc/prometheus/rules
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    depends_on:
+      - alertmanager
+
+  alertmanager:
+    <<: *service-base
+    image: prom/alertmanager:latest
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./config/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+      - '--storage.path=/alertmanager'
+
+  grafana:
+    <<: *service-base
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./config/grafana/provisioning:/etc/grafana/provisioning
+      - ./config/grafana/dashboards:/var/lib/grafana/dashboards
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_ALLOW_SIGN_UP=false
+    depends_on:
+      - prometheus
+
+networks:
+  umbrella_network:
+    driver: bridge
+
+volumes:
+  mongodb_data:
+  redis_data:
+  vector_data:
+  prometheus_data:
+  grafana_data: 

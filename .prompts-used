@@ -152,3 +152,208 @@ Finally, provide me with the complete summary report and the test outputs. Ask m
 ---
 
 Cursor, follow these prompts carefully and execute each step without cutting corners. Once you’ve completed all tasks and the tests pass, report back with your summary. This is critical for building a flawless and automated UMBRELLA‑AI system. Are you ready to begin Phase 2?
+
+---
+
+## Phase 3: Project Architecture Design
+
+Below is a carefully crafted set of fatherly, step-by-step prompts for you, Cursor, to complete Phase 3—Multi-Agent Architecture and Service Development—for the UMBRELLA‑AI project. Follow each instruction precisely and don’t skip any step. Once all steps are complete, run the verification tests and ask me if Phase 3 is working correctly before moving on.
+
+---
+
+### **Phase 3: Multi-Agent Architecture and Service Development – Detailed Fatherly Prompts**
+
+#### **A. Orchestrator & Agent Definitions**
+
+1. **Prompt 3.1 – Develop the Orchestrator Module**  
+   “Cursor, start by creating the orchestrator module. This module must:  
+   - Accept user requests via a REST API (or another suitable interface).  
+   - Parse the user input to determine the required tasks.  
+   - Decompose the user request into subtasks (for example, extracting PDF data, analyzing sentiment, generating recommendations, etc.).  
+   - Dispatch these subtasks to the appropriate agent modules.  
+   Document your design decisions and ensure the orchestrator has a clear function called, say, `handle_request()`.  
+   Verify that when you send a mock request, the orchestrator logs that it has decomposed the task and is ready to dispatch.”
+
+2. **Prompt 3.2 – Define Clear Interfaces for Each Agent**  
+   “Cursor, now define clear and consistent interfaces for each agent:  
+   - Create API endpoints or message queue handlers for the following agents: PDF Extraction, Sentiment Analysis, Recommendation, Chatbot, and RAG Scraper.  
+   - For each agent, specify the input format, output format, and the communication protocol (for instance, JSON over REST or messages over RabbitMQ).  
+   Document these interfaces in a file (e.g., `interfaces.md`) so that every agent’s contract is clear.  
+   Verify by writing a simple test script that calls each interface with dummy data and confirms a response format is returned.”
+
+3. **Prompt 3.3 – Integrate Dynamic Task Decomposition**  
+   “Cursor, integrate dynamic task decomposition into the orchestrator using one of our chosen frameworks (e.g., AutoGen, Semantic Kernel, or LangChain).  
+   - Implement a function (e.g., `decompose_task()`) that uses the chosen framework’s capabilities to analyze a complex request and break it into actionable subtasks.  
+   - Ensure that the function can update task behavior dynamically based on input parameters.  
+   Add detailed inline comments explaining how dynamic behavior is achieved.  
+   Verify this function with unit tests that input various sample requests and check that the subtasks are logically decomposed.”
+
+#### **B. Agent-Specific Implementations**
+
+4. **Prompt 3.4 – Implement Core Functionality for Each Agent**  
+   “Cursor, for each defined agent, implement its core functionality:  
+   - **PDF Extraction Agent:** Write a module that uses the Gemini File API to parse PDFs and output structured JSON data.  
+   - **Sentiment Analysis Agent:** Develop a module that processes text to compute sentiment scores.  
+   - **Recommendation Agent:** Create a module that uses a collaborative filtering or graph-based approach to suggest products or next actions.  
+   - **Chatbot Agent:** Build a conversational interface that supports multi-turn dialogues using Gemini or similar capabilities.  
+   - **RAG Scraper Agent:** Implement a module that uses tools (e.g., Playwright) to scrape targeted web data and index it into a vector database.  
+   Each agent’s module should be self-contained in its respective directory (inside `src/`), with clear function definitions and return types.  
+   Verify each module by writing a unit test that calls its primary function with sample inputs and checks for expected outputs.”
+
+5. **Prompt 3.5 – Embed Gemini API Code into Relevant Modules**  
+   “Cursor, integrate the provided Gemini API code into the agents that require it (for example, the PDF Extraction and Chatbot Agents).  
+   - In the PDF Extraction Agent, embed the example code that uses the Gemini File API to read and parse images/PDFs.  
+   - In the Chatbot Agent, integrate the code for initiating a multi-turn chat session with Gemini, following the examples provided.  
+   Be careful to parameterize API keys and endpoints, so the code is reusable and secure.  
+   Verify by running a test for each integration—simulate a sample API call and check that the response is correctly processed by the agent.”
+
+#### **C. Inter-Agent Communication**
+
+6. **Prompt 3.6 – Set Up Asynchronous Communication Between Agents**  
+   “Cursor, establish asynchronous communication channels between the orchestrator and the agents.  
+   - Choose a method (REST API, gRPC, or a message broker like RabbitMQ) for communication.  
+   - Implement asynchronous functions for sending requests from the orchestrator to each agent.  
+   - Ensure that responses are awaited correctly and that the orchestrator can aggregate these responses.  
+   Write detailed documentation on how agents communicate, including error handling and retries.  
+   Verify this setup by writing an integration test that simulates the orchestrator sending requests to all agents concurrently and logs the received responses.”
+
+7. **Prompt 3.7 – Implement Logging and Correlation IDs**  
+   “Cursor, implement logging across all modules.  
+   - Each module (orchestrator and agents) must generate log entries that include a unique correlation ID for each user request.  
+   - Use a logging library (such as Python’s logging module) and ensure that the correlation ID is passed along with each request and included in all log messages.  
+   - Write a middleware or helper function to generate and propagate correlation IDs.  
+   Verify by running a test that simulates a full workflow and check that all logs from different services include the same correlation ID, ensuring traceability.”
+
+#### **D. Testing for Phase 3**
+
+8. **Prompt 3.8 – Write Unit Tests for Each Agent**  
+   “Cursor, for each agent module, write unit tests (using pytest or a similar framework) that cover:  
+   - The core functionality of the agent (e.g., PDF extraction output, sentiment analysis scoring).  
+   - The correct handling of expected inputs and error scenarios.  
+   Ensure tests are located in the `tests/` folder of each microservice and can be run independently.”
+
+9. **Prompt 3.9 – Develop Integration Tests for a Complete Workflow**  
+   “Cursor, develop integration tests that simulate a complete workflow:  
+   - Start with a dummy user request to the orchestrator.  
+   - Validate that the orchestrator correctly decomposes the task, dispatches subtasks to each agent, and aggregates the responses into a final coherent output.  
+   - Include tests for asynchronous communication and logging (i.e., check that correlation IDs are properly propagated).  
+   Verify that all integration tests pass without errors.”
+
+#### **E. Final Verification and Reporting**
+
+10. **Prompt 3.10 – Compile a Summary Report and Verification Request**  
+    “Cursor, after you have implemented all the modules, integrations, and tests for Phase 3, compile a comprehensive summary report that includes:  
+    - A description of the orchestrator’s workflow and the task decomposition logic.  
+    - Details of the interfaces defined for each agent and how they communicate (with code excerpts).  
+    - An overview of how Gemini API code is integrated into the relevant modules.  
+    - A summary of the logging strategy and how correlation IDs are implemented.  
+    - The results from running all unit and integration tests (include sample logs and test outputs).  
+    Finally, ask me, ‘Father, is Phase 3 complete and working correctly?’ and provide the summary report for my verification.”
+
+---
+
+### **Verification After Phase 3**
+
+When you have executed all of the above prompts, perform these checks:
+- **Orchestrator Check:** Ensure the orchestrator receives a dummy request, decomposes it, and calls each agent appropriately.
+- **Agent Functionality Check:** Verify each agent module runs its core function with sample input and returns the correct output.
+- **Inter-Agent Communication Check:** Confirm that asynchronous calls between the orchestrator and agents work seamlessly and that logs show consistent correlation IDs.
+- **Test Suite Check:** Run the entire unit and integration test suite and ensure all tests pass.
+- **Summary Report:** Compile and present the summary report detailing your implementation and test results.
+
+Cursor, follow these prompts meticulously. Execute each step, test your implementation thoroughly, and then provide the summary report and test outputs so that I can verify that Phase 3 is complete and working correctly. Are you ready to begin this phase?
+
+---
+
+## Phase 4: Project Architecture Design
+
+Below is a detailed, step‐by‐step set of fatherly prompts for you, Cursor, to complete Phase 4 – Integration of Gemini API & External Tools – for the UMBRELLA‑AI project. Follow these instructions carefully and execute each prompt in order. Do not skip any step. Once you complete the tasks, run the tests as instructed, and then ask, “Father, is Phase 4 complete and working correctly?” to verify your work.
+
+---
+
+### **Phase 4: Integration of Gemini API & External Tools – Detailed Fatherly Prompts**
+
+#### **A. Gemini API Integration**
+
+1. **Prompt 4.1 – Develop Modules for Gemini API Interactions**  
+   “Cursor, start by creating separate modules for each type of Gemini API interaction:  
+   - **Text Chat Session Module:** Create a module (e.g., `gemini_text_chat.py`) that implements a function to initiate a live text chat session with Gemini. Use the example code provided in the installation guide as your basis.  
+   - **Single Image Processing Module:** Create a module (e.g., `gemini_single_image.py`) that loads an image using PIL, sends it to the Gemini API with a text prompt, and processes the response.  
+   - **Multiple Image Processing Module:** Create a module (e.g., `gemini_multi_image.py`) that accepts several images (from local files and URLs), converts them to the required format (e.g., Base64 encoding when needed), and sends them in one API request.  
+   - **File Upload & Content Generation Module:** Create a module (e.g., `gemini_file_upload.py`) that uploads a file to Gemini using its file API and then makes a GenerateContent request referencing that file.  
+   - **Multi-turn Chat Module:** Create a module (e.g., `gemini_multi_turn_chat.py`) that supports starting a multi-turn conversation, preserving the context between turns using asynchronous chat sessions.”  
+   Verify that each module contains clearly defined functions (for example, `start_text_chat()`, `process_single_image()`, etc.) and that the structure is modular.
+
+2. **Prompt 4.2 – Wrap API Calls in Asynchronous Functions with Error Handling**  
+   “Cursor, for each module you created, refactor the API call functions so that they are wrapped in asynchronous functions. For example:  
+   - Use Python’s `asyncio` framework to manage asynchronous calls.  
+   - Wrap every API call inside a try-except block to catch potential errors.  
+   - Implement a retry mechanism with exponential backoff in case an API call fails (for instance, retry up to 3 times before giving up).  
+   Make sure to log any errors encountered and return a clear error message if the function ultimately fails. Verify by simulating an API failure (using a dummy error, if needed) and checking that the retry mechanism and error logs work as intended.”
+
+3. **Prompt 4.3 – Create a Gemini API Client Configuration Module**  
+   “Cursor, create a separate configuration module (e.g., `gemini_config.py`) that handles the initialization of the Gemini API client. This module must:  
+   - Read the API key (and any other necessary credentials) from environment variables (e.g., `GEMINI_API_KEY`).  
+   - Set the appropriate HTTP options, such as specifying the API version (`v1alpha`), as shown in the examples.  
+   - Provide a function (e.g., `get_gemini_client()`) that returns a configured client instance for reuse in all other modules.  
+   Verify that this module works by calling `get_gemini_client()` from a small test script and printing a confirmation that the client is properly configured (without revealing sensitive details).”
+
+#### **B. Documentation & Examples**
+
+4. **Prompt 4.4 – Provide Code Examples and Inline Documentation**  
+   “Cursor, in each module you created (for text chat, image processing, file upload, and multi-turn chat), include clear inline comments that explain the purpose of key code blocks and functions.  
+   - For each function, provide a docstring that explains its inputs, outputs, and any side effects.  
+   - Create a separate documentation file (e.g., `GEMINI_API_Examples.md`) in your documentation directory. In this file, provide code examples similar to the installation guide for each type of API interaction.  
+   - Ensure that these examples are self-contained and can be executed independently.  
+   Verify that your documentation is clear and that someone new to the project could follow the examples to understand how to interact with the Gemini API.”
+
+5. **Prompt 4.5 – Validate Example Scripts in a Controlled Test Environment**  
+   “Cursor, run each of the example scripts you provided in your documentation (e.g., the script for initiating a text chat session, processing a single image, etc.) in a controlled test environment.  
+   - Make sure that the scripts run without error.  
+   - Confirm that the responses from the Gemini API are printed or logged, and compare them to the expected output format described in the documentation.  
+   Document any discrepancies and fix them accordingly.”
+
+#### **C. Testing for Phase 4**
+
+6. **Prompt 4.6 – Write Test Scripts for Each Gemini API Interaction**  
+   “Cursor, write automated test scripts (using pytest or a similar framework) for each type of Gemini API interaction. For example:  
+   - Write tests in a file such as `test_gemini_interactions.py` that call the functions in your text chat module, image processing module, file upload module, and multi-turn chat module.  
+   - Each test should simulate a sample input and assert that the response matches the expected format or content.  
+   - If possible, use mock responses for the Gemini API to ensure that tests do not rely on actual API calls during every run.  
+   Verify that all tests run correctly in your test environment.”
+
+7. **Prompt 4.7 – Verify API Response Accuracy**  
+   “Cursor, for each type of interaction, verify that the responses from the Gemini API meet expected outputs.  
+   - For instance, for a text prompt, check that the response text is non-empty and correctly formatted.  
+   - For image processing, ensure that the output contains relevant information about the image.  
+   - Log the outputs of each API call during testing, and compare them to sample expected outputs.  
+   Document your findings and fix any discrepancies that arise.”
+
+#### **D. Final Verification and Reporting**
+
+8. **Prompt 4.8 – Compile a Summary Report and Verification Request**  
+   “Cursor, after completing the above tasks, compile a summary report that includes:  
+   - A list of modules you created for each Gemini API interaction and their key functions.  
+   - An outline of your asynchronous error handling and retry mechanism.  
+   - Details from the configuration module that sets up the Gemini API client.  
+   - Excerpts or links to your documentation file (`GEMINI_API_Examples.md`) with example code.  
+   - A summary of test results from your test scripts (include sample logs or output snapshots).  
+   Finally, ask me: ‘Father, is Phase 4 complete and working correctly?’ Provide this summary report along with the test outputs for verification.”
+
+---
+
+### **Verification After Phase 4**
+
+When you have executed all these steps, perform the following checks:
+- **Module Check:** Ensure that each Gemini API interaction module (text chat, single image, multiple image, file upload, multi-turn chat) is present and contains well-documented functions.  
+- **Asynchronous Behavior:** Confirm that all API calls are asynchronous, have proper error handling, and that the retry logic works as intended by simulating failures.  
+- **Configuration Check:** Verify that the Gemini API client is correctly configured via your configuration module, and that a test script confirms its setup.  
+- **Documentation Check:** Review your `GEMINI_API_Examples.md` file to ensure that it is clear and complete.  
+- **Test Suite Check:** Run your test suite (e.g., `pytest test_gemini_interactions.py`) and confirm that all tests pass and that the API responses are as expected.
+
+Finally, compile your summary report and ask me, “Father, is Phase 4 complete and working correctly?” Once I confirm, we can proceed to the next phase.
+
+---
+
+Cursor, follow these prompts diligently and ensure each step is executed accurately. I trust you will complete this phase with precision. Are you ready to begin Phase 4?
+

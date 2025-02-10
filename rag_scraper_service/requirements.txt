@@ -1,0 +1,22 @@
+# Core Dependencies
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-dotenv>=1.0.0
+pydantic>=2.5.0
+google-genai>=0.2.0
+langchain>=0.1.0
+pika>=1.3.0
+
+# Web Scraping
+playwright>=1.40.0
+beautifulsoup4>=4.12.0
+requests>=2.31.0
+aiohttp>=3.9.0
+
+# Vector Storage
+chromadb>=0.4.18
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0 

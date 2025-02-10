@@ -1,0 +1,231 @@
+---
+description: 
+globs: 
+---
+## 1. Project Initialization
+
+### 1.1 Repository & Version Control  
+- **Create a Git repository** that contains your complete project source code.  
+- **Define branching strategies:**  
+  - `main`: production‑ready code  
+  - `dev`: active development  
+- Include a robust **.gitignore** to exclude environment files, API keys, temporary artifacts, and Docker build artifacts.
+
+### 1.2 Requirements & Environment Setup  
+- **Document requirements** for each module (e.g., OCR/PDF extraction, recommendation engine, sentiment analysis, chat interface, web scraping with RAG).  
+- Create a `requirements.txt` (or `pyproject.toml`) with dependencies including:  
+  - `google-genai`  
+  - `langchain`, `pydantic`, `playwright`, etc.  
+- **Configure environment variables:**  
+  - API keys (e.g., `GEMINI_API_KEY`)  
+  - Database credentials, secret keys  
+- Prepare an architectural diagram that shows each microservice (or agent), the orchestrator, vector database, and communication channels.
+
+---
+
+## 2. Local Development Setup (Mirrored on AWS Free Tier)
+
+### 2.1 Directory Structure & Docker Configuration  
+Organize your project with a clear directory structure (example):
+
+```
+umbrella_ai/
+├── orchestrator/
+│   ├── Dockerfile
+│   ├── src/
+│   └── tests/
+├── pdf_extraction_service/
+│   ├── Dockerfile
+│   ├── src/
+│   └── tests/
+├── recommendation_service/
+│   ├── Dockerfile
+│   ├── src/
+│   └── tests/
+├── sentiment_service/
+│   ├── Dockerfile
+│   ├── src/
+│   └── tests/
+├── chatbot_service/
+│   ├── Dockerfile
+│   ├── src/
+│   └── tests/
+├── rag_scraper_service/
+│   ├── Dockerfile
+│   ├── src/
+│   └── tests/
+├── vector_db/
+│   ├── Dockerfile
+│   └── src/
+├── docker-compose.yml
+├── .env
+└── README.md
+```
+
+- **Docker & Docker Compose:**  
+  - Each microservice runs in its own container.  
+  - The `docker-compose.yml` defines all services, networks, and volumes, pulling environment variables from the `.env` file.  
+  - For local development, mirror this environment on an AWS Free Tier instance running Docker (e.g., on an EC2 t2.micro) for testing.
+
+### 2.2 Security and Local Testing  
+- **Local Security Measures:**  
+  - Store secrets (like your `GEMINI_API_KEY`) in `.env` (do not commit this file).  
+  - Run containers as non-root users and expose only necessary ports.  
+- **Testing Strategy:**  
+  - Write **unit tests** for individual logic (e.g., image parsing, sentiment scoring).  
+  - Develop **integration tests** to verify inter-service communication (the orchestrator calling PDF extraction and receiving structured responses).  
+  - Set up **end-to-end tests** simulating a full user flow from input upload to final recommendation.
+
+---
+
+## 3. Core Multi-Agent Architecture
+
+### 3.1 Orchestrator and Agent Roles  
+- **Orchestrator Agent:**  
+  - Manages overall workflow: accepts user requests (via API gateway or front-end), interprets tasks, maintains session state, and coordinates agent interactions.
+  - Dynamically decomposes tasks and assigns them to specialized agents.
+
+- **Specialized Agents:**  
+  - **PDF Extraction Agent:** Uses Gemini’s File API (see Gemini API code below) for parsing and structured JSON output.  
+  - **Sentiment Analysis Agent:** Uses a fine-tuned LLM to classify text sentiment.  
+  - **Recommendation Agent:** Implements neural collaborative filtering or graph-based embedding to suggest products or actions based on historical data.  
+  - **Chatbot Agent:** Maintains multi-turn conversation sessions and leverages Gemini for natural language responses.  
+  - **RAG Scraper Agent:** Automates web navigation (e.g., using Playwright) to scrape and index data into your vector database.
+
+- **Agent Integration:**  
+  - Use asynchronous messaging (e.g., via message queues or direct REST/gRPC calls) to facilitate seamless inter-agent communication.
+  - Optionally integrate frameworks such as **AutoGen**, **Semantic Kernel**, or **LangChain/LangGraph** to allow dynamic task decomposition and memory management. These frameworks will enable your agents to update their behavior in real time based on the dynamic task context.
+
+### 3.2 Incorporating Gemini API Code  
+Embed the provided Gemini API usage examples in your agent implementations (for instance, within the chatbot or image-processing agent):
+
+#### Example: Gemini Text Chat Session
+
+```python
+!pip install google-genai
+
+from google import genai
+import asyncio
+
+# Set up the client for Gemini API
+client = genai.Client(api_key="YOUR_GEMINI_API_KEY", http_options={'api_version': 'v1alpha'})
+model_id = "gemini-2.0-flash-exp"
+config = {"responseModalities": ["TEXT"]}
+
+async def main():
+    async with client.aio.live.connect(model=model_id, config=config) as session:
+        while True:
+            message = input("User> ")
+            if message.lower() == "exit":
+                break
+            await session.send(input=message, end_of_turn=True)
+            async for response in session.receive():
+                if response.text is None:
+                    continue
+                print(response.text, end="")
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+#### Example: Gemini Single Image Model Usage
+
+```python
+import PIL.Image
+from google import genai
+
+client = genai.Client(api_key="YOUR_GEMINI_API_KEY")
+image = PIL.Image.open('/path/to/image.png')
+response = client.models.generate_content(
+    model="gemini-2.0-flash-exp",
+    contents=["What is this image?", image])
+print(response.text)
+```
+
+*(Include similar snippets for multiple images and file API usage as needed.)*
+
+---
+
+## 4. Data Flow
+
+- **User Request:**  
+  - A user sends a request (e.g., “Analyze my invoice and recommend next products”).
+- **Orchestrator:**  
+  - Receives input and, using stateful context (via vector database or in-memory store), determines which agents to invoke.
+- **Task Decomposition:**  
+  - The orchestrator calls the appropriate agents sequentially or in parallel.
+  - Example: PDF Extraction Agent parses the invoice; Sentiment Agent checks the tone; Recommendation Agent calculates suggestions.
+- **Aggregation and Response:**  
+  - The orchestrator aggregates outputs from agents into a coherent final JSON or text response, which is then returned to the user.
+
+---
+
+## 5. Deployment Strategy
+
+### 5.1 Local (AWS Free Tier Mirrored Docker)  
+- **Docker Compose:**  
+  - Develop and test your system locally using Docker Compose on an AWS Free Tier instance.
+- **AWS Free Tier Setup:**  
+  - Utilize AWS Free Tier resources (e.g., EC2, Lightsail) to mirror your local Docker environment.
+  - Ensure your environment mimics production configurations (including security groups, IAM roles, and minimal public exposure).
+
+### 5.2 Production Deployment on AWS  
+- **Container Orchestration:**  
+  - Transition your Docker Compose setup to AWS ECS/EKS or AWS Fargate.
+- **Networking & Security:**  
+  - Configure a VPC with public subnets (for load balancers) and private subnets (for internal services).
+  - Use AWS Secrets Manager to securely manage API keys and credentials.
+  - Enforce IAM roles with minimal privileges.
+- **Scalability:**  
+  - Set auto-scaling policies based on CPU, memory, or API request throughput.
+- **Monitoring:**  
+  - Use AWS CloudWatch or integrate with Prometheus/Grafana for logging and metrics.
+  - Implement distributed tracing (e.g., using OpenTelemetry) to follow requests across agents.
+
+---
+
+## 6. Observability and Monitoring
+
+- **Logging:**  
+  - Implement structured logging (JSON format) in each microservice.
+  - Store logs in CloudWatch or an ELK stack.
+- **Metrics & Tracing:**  
+  - Use Prometheus and Grafana or AWS CloudWatch metrics to monitor latency, error rates, and resource usage.
+  - Integrate distributed tracing to capture inter-agent communication flows.
+- **Alerting:**  
+  - Set up automated alerts for abnormal behavior (high error rates, latency spikes) with defined on-call protocols.
+
+---
+
+## 7. Testing and Quality Assurance
+
+- **Unit Testing:**  
+  - Write tests for core logic in each agent (e.g., for parsing, sentiment analysis, recommendation algorithms).
+- **Integration Testing:**  
+  - Simulate service-to-service interactions: the orchestrator calling each agent and validating the aggregated output.
+- **End-to-End Testing:**  
+  - Create staging environments (mirroring production) to run scenario-based tests from user input to final aggregated output.
+- **Load & Stress Testing:**  
+  - Use tools like Locust or JMeter to simulate high request volumes and identify bottlenecks.
+- **Continuous Integration/Deployment (CI/CD):**  
+  - Set up pipelines that automatically run tests and deploy updates to your Docker containers.
+
+---
+
+## 8. Launch and Post-Launch Steps
+
+### 8.1 Go-Live Checklist
+- Verify all environment variables, API keys, and secret storage mechanisms.
+- Ensure SSL/TLS certificates are properly configured for external endpoints.
+- Validate domain/DNS settings for the public-facing orchestrator service.
+- Confirm AWS usage quotas and free tier limits.
+
+### 8.2 User Feedback and Iteration
+- Monitor production logs and metrics to gather performance insights.
+- Collect user feedback to refine conversational interfaces and agent responses.
+- Plan for regular updates and continuous improvement cycles.
+
+### 8.3 Maintenance and Roadmap
+- Rotate keys and credentials periodically.
+- Update CI/CD pipelines for new features and regression testing.
+- Scale services incrementally as user load increases and new requirements are identified.

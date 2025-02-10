@@ -1,0 +1,23 @@
+# Core Dependencies
+fastapi>=0.109.0
+uvicorn>=0.27.0
+python-dotenv>=1.0.0
+pydantic>=2.6.0
+httpx>=0.26.0
+tenacity>=8.2.0
+
+# LangChain and Google AI
+langchain>=0.1.0
+langchain-google-genai>=0.0.5
+langchain-community>=0.0.10
+google-generativeai>=0.3.0
+
+# Testing
+pytest>=7.4.0
+pytest-asyncio>=0.23.0
+pytest-cov>=4.1.0
+requests>=2.31.0
+
+# Additional Dependencies
+aio-pika>=9.3.1
+python-json-logger>=2.0.0 

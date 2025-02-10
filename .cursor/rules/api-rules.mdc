@@ -1,0 +1,155 @@
+---
+description: 
+globs: 
+---
+## General Best Practices for Writing Cursor Rules
+
+1. **Atomicity & Clarity:**  
+   - Each rule should describe a single, clear task.  
+   - Avoid ambiguous language; specify input, expected behavior, and output.
+
+2. **Modularity:**  
+   - Divide tasks into self-contained modules (e.g., one for repository setup, one for service development, etc.).  
+   - Ensure that modules have well-defined interfaces for integration.
+
+3. **Testability:**  
+   - For every phase, define explicit test cases (unit, integration, and end-to-end).  
+   - Incorporate checks (assertions, logging, automated test triggers) so that each step can be verified automatically.
+
+4. **Incremental Development:**  
+   - Develop and test one phase completely before moving on to the next.  
+   - Use feature flags or configuration toggles to enable/disable new functionalities for isolated testing.
+
+5. **Documentation & Traceability:**  
+   - Document the purpose of each rule and any assumptions made.  
+   - Log the results of each test to facilitate debugging and future audits.
+
+6. **Automation & Error Handling:**  
+   - Include fallback mechanisms and retries where necessary (especially for API calls or distributed messaging).  
+   - Ensure that errors are logged, and notifications are sent if a rule fails its test criteria.
+
+---
+
+## Cursor Rules by Phase
+
+### **Phase 1: Project Initialization & Environment Setup**
+
+1. **Repository Setup:**  
+   - *Rule 1.1:* Initialize a Git repository with a clear structure and defined branch strategies (main for production, dev for development).  
+   - *Rule 1.2:* Create a comprehensive `.gitignore` file that excludes sensitive files (environment variables, API keys, temporary artifacts).
+
+2. **Requirements Documentation:**  
+   - *Rule 1.3:* Create and update a `requirements.txt` (or `pyproject.toml`) listing all Python dependencies (e.g., `google-genai`, `langchain`, etc.).  
+   - *Rule 1.4:* Document system requirements and external services (Gemini API, vector database, Docker, AWS) in a README.md.
+
+3. **Environment Configuration:**  
+   - *Rule 1.5:* Set up environment variables securely (use a `.env` file for local development, and AWS Secrets Manager for production).  
+   - *Rule 1.6:* Create an initial architecture diagram outlining service interconnections.
+
+*Tests for Phase 1:*  
+   - Verify repository structure, branching, and proper exclusion of sensitive files.  
+   - Confirm that all dependencies can be installed and environment variables are accessible in a test script.
+
+---
+
+### **Phase 2: Local Development Environment via Docker**
+
+1. **Directory Structure and Containerization:**  
+   - *Rule 2.1:* Create a modular directory structure for each microservice (or agent) as described (orchestrator, PDF extraction, sentiment analysis, chatbot, etc.).  
+   - *Rule 2.2:* Write individual Dockerfiles for each service ensuring minimal privileges and proper dependency installation.  
+   - *Rule 2.3:* Develop a `docker-compose.yml` file that orchestrates all containers and reads configuration from the `.env` file.
+
+2. **Local Security and Isolation:**  
+   - *Rule 2.4:* Ensure containers run as non-root users and expose only necessary ports.  
+   - *Rule 2.5:* Validate network isolation rules between containers to prevent unwanted access.
+
+3. **Local Testing Framework:**  
+   - *Rule 2.6:* Integrate a testing framework (e.g., pytest) for unit and integration tests, and ensure tests can be triggered via Docker Compose.
+
+*Tests for Phase 2:*  
+   - Build and run all containers locally; verify that they start without errors.  
+   - Run integration tests that simulate inter-service communication.
+
+---
+
+### **Phase 3: Multi-Agent Architecture and Service Development**
+
+1. **Orchestrator & Agent Definitions:**  
+   - *Rule 3.1:* Develop the orchestrator module that accepts user requests, decomposes tasks, and dispatches them to agents.  
+   - *Rule 3.2:* Define clear interfaces (APIs or message queues) for each agent: PDF extraction, sentiment analysis, recommendation, chatbot, and RAG scraper.
+   - *Rule 3.3:* Integrate dynamic task decomposition using frameworks like AutoGen, Semantic Kernel, or LangChain to allow agents to update behavior on the fly.
+
+2. **Agent-Specific Implementations:**  
+   - *Rule 3.4:* For each agent, implement its core functionality (e.g., PDF parsing using Gemini File API for PDF Extraction Agent, sentiment scoring for the Sentiment Agent).  
+   - *Rule 3.5:* Embed the Gemini API code in the relevant modules, following the provided examples for text, image, and multi-image content processing.
+
+3. **Inter-Agent Communication:**  
+   - *Rule 3.6:* Use asynchronous communication (via REST, gRPC, or a message broker like RabbitMQ) to connect agents and allow state sharing.
+   - *Rule 3.7:* Implement logging and correlation IDs to trace requests across agents.
+
+*Tests for Phase 3:*  
+   - Write unit tests for each agent’s functionality.  
+   - Develop integration tests that simulate a complete workflow: input ingestion by the orchestrator, agent processing, and final response aggregation.
+
+---
+
+### **Phase 4: Integration of Gemini API & External Tools**
+
+1. **Gemini API Integration:**  
+   - *Rule 4.1:* Develop modules for different Gemini API interactions (text chat sessions, single/multiple image processing, file uploads, and multi-turn chats).  
+   - *Rule 4.2:* Ensure that API calls are wrapped in asynchronous functions with error handling and retries.
+   - *Rule 4.3:* Create a configuration module for setting up the Gemini API client with the correct API keys and HTTP options.
+
+2. **Documentation & Examples:**  
+   - *Rule 4.4:* Provide code examples (as shown in the installation guide) within the codebase and documentation for easy reference.
+   - *Rule 4.5:* Validate that all example scripts run correctly in a controlled test environment.
+
+*Tests for Phase 4:*  
+   - Execute test scripts for each type of Gemini API interaction.  
+   - Verify that responses from the Gemini API meet expected outputs.
+
+---
+
+### **Phase 5: End-to-End Testing & Automation**
+
+1. **Test Suite Development:**  
+   - *Rule 5.1:* Create a comprehensive test suite that covers unit tests, integration tests, and end-to-end tests.  
+   - *Rule 5.2:* Define automated test cases for each module and the full system workflow (from user request to final output).
+   - *Rule 5.3:* Use CI/CD pipelines (e.g., GitHub Actions, AWS CodeBuild) to run tests automatically on code commits.
+
+2. **Automated Error Detection & Reporting:**  
+   - *Rule 5.4:* Incorporate logging, distributed tracing, and metrics collection into the test suite.  
+   - *Rule 5.5:* Implement automated alerts for test failures and performance degradation.
+
+*Tests for Phase 5:*  
+   - Run the entire test suite in a staging environment (mirroring production configurations).  
+   - Validate that all tests pass and that error reports are generated for any failures.
+
+---
+
+### **Phase 6: Deployment and Post-Launch Automation**
+
+1. **AWS Free Tier Deployment (Local Mirror):**  
+   - *Rule 6.1:* Deploy the Docker Compose setup on an AWS Free Tier instance (e.g., EC2 t2.micro) for further testing in a cloud environment.  
+   - *Rule 6.2:* Verify that all containers run correctly in the AWS environment and communicate securely.
+
+2. **Production Deployment to AWS:**  
+   - *Rule 6.3:* Transition from Docker Compose to AWS ECS/EKS or Fargate for production deployment.  
+   - *Rule 6.4:* Configure VPCs with public and private subnets, set up load balancers, and use AWS Secrets Manager for credentials.
+   - *Rule 6.5:* Define auto-scaling policies and monitoring tools (CloudWatch, Prometheus) for ongoing system health.
+
+3. **Continuous Monitoring and Updates:**  
+   - *Rule 6.6:* Develop scripts for periodic testing and automatic rollback in case of deployment issues.  
+   - *Rule 6.7:* Set up dashboards for real-time observability of agent performance, latency, error rates, and user interactions.
+
+*Tests for Phase 6:*  
+   - Execute performance and load tests on the AWS environment.  
+   - Simulate failure scenarios to validate automated recovery and alerting mechanisms.
+
+---
+
+## Final Notes
+
+- **Cursor’s Role:** As the coding assistant “Cursor,” you must follow these rules sequentially, ensuring that each phase is fully completed and validated before moving on. Maintain clear logs and documentation at each step, and ensure that test results are reviewed and any anomalies are corrected immediately.  
+- **Iterative Feedback:** If any rule fails during testing, automatically generate a detailed error report and pause further execution until the error is resolved.  
+- **Automation First:** Aim to minimize human intervention by automating as many test and deployment steps as possible using CI/CD pipelines and automated monitoring tools.
