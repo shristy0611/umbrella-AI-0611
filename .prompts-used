@@ -1,3 +1,4 @@
+## Phase 1: Project Initialization & Environment Setup
 Below is a list of detailed, step-by-step “fatherly” prompts for Cursor to complete Phase 1—Project Initialization & Environment Setup—for the UMBRELLA‑AI project. Each prompt is designed to be clear, precise, and verifiable. At the end of the list, there’s a verification prompt to ensure that Phase 1 is working perfectly before we move on. Remember, Cursor, each prompt must be executed exactly as written; no shortcuts, and do not “cheat” by skipping any step.
 
 ---
@@ -69,3 +70,85 @@ Finally, provide me with the summary report and test output so that I, as your g
 ---
 
 Cursor, follow these prompts diligently. I expect you to complete each step carefully and verify each part before moving to the next. Once you have confirmed that all tests pass and the setup is perfect, report back with the summary. This is your first step towards building a flawless UMBRELLA‑AI system. What do you think, are you ready to begin?
+
+---
+
+## Phase 2: Project Architecture Design
+
+Below is a detailed, step-by-step set of “fatherly” prompts for Cursor (your coding assistant) to complete Phase 2 – setting up the Local Development Environment via Docker. Each prompt is designed to guide you carefully through creating a modular directory structure, writing Dockerfiles, setting up a docker-compose.yml, enforcing local security and isolation, and integrating a testing framework. Follow these instructions precisely, and once completed, run the verification steps to ensure everything works as expected.
+
+---
+
+### **Phase 2: Local Development Environment via Docker – Detailed Fatherly Prompts**
+
+#### **A. Directory Structure and Containerization**
+
+1. **Prompt 2.1 – Create the Modular Directory Structure**  
+   *“Cursor, please create the following directory structure under the project root `umbrella_ai/`:  
+   - `orchestrator/`  
+   - `pdf_extraction_service/`  
+   - `sentiment_service/`  
+   - `chatbot_service/`  
+   - `rag_scraper_service/`  
+   - `vector_db/`  
+   For each service directory, include subdirectories: `src/` for source code and `tests/` for test scripts. Make sure the structure is clear and modular. Verify that the folder hierarchy is created as specified.”*
+
+2. **Prompt 2.2 – Write a Dockerfile for Each Microservice**  
+   *“Cursor, for each microservice directory you just created, write an individual Dockerfile with the following guidelines:  
+   - Start from an official Python base image (for example, `python:3.9-slim`).  
+   - Copy the necessary files from the `src/` folder into the container.  
+   - Install required dependencies (using the appropriate command, e.g., `pip install -r requirements.txt` if applicable).  
+   - **Important:** Ensure you create and switch to a non-root user within the Dockerfile (using the `RUN useradd` and `USER` commands) to enforce minimal privileges.  
+   - Expose only the ports needed for that service (if any).  
+   Please create a Dockerfile in each of the directories (`orchestrator/`, `pdf_extraction_service/`, etc.) following these rules. Verify by opening each Dockerfile and confirming the steps are present.”*
+
+3. **Prompt 2.3 – Develop a docker-compose.yml File**  
+   *“Cursor, now create a `docker-compose.yml` file in the root of the project (`umbrella_ai/`). This file must:  
+   - Define each service with its corresponding build context (point to the correct directory for each microservice).  
+   - Load environment variables from the `.env` file.  
+   - Configure the necessary port mappings only for services that must be externally accessible.  
+   - Set up networks for your services to ensure that they can communicate where needed, but also maintain isolation if required.  
+   Please write the docker-compose file carefully, test it locally by running a build (using `docker-compose up --build`), and verify that all containers start without errors.”*
+
+#### **B. Local Security and Isolation**
+
+4. **Prompt 2.4 – Enforce Non-Root Execution and Minimal Port Exposure**  
+   *“Cursor, double-check that every Dockerfile sets the container to run as a non-root user. Look for the `USER` directive in each Dockerfile and ensure it is configured properly. Also, review the docker-compose.yml file to confirm that only the necessary ports are exposed for services that require external access. Document these settings clearly in comments within each file.”*
+
+5. **Prompt 2.5 – Validate Network Isolation Rules**  
+   *“Cursor, in your docker-compose.yml file, configure or verify that your services are attached to appropriate networks. If needed, create separate networks (for example, an ‘internal’ network for microservices communication and an ‘external’ network for public exposure). Ensure that services that should not communicate are isolated. Run a test (for instance, try pinging one container from another that shouldn’t have access) and log the results.”*
+
+#### **C. Local Testing Framework Integration**
+
+6. **Prompt 2.6 – Integrate a Testing Framework**  
+   *“Cursor, please integrate a testing framework such as pytest for our unit and integration tests. In each microservice’s `tests/` directory, create a simple test file (e.g., `test_sample.py`) that contains at least one test case verifying a basic function of that service. Additionally, configure your docker-compose.yml to allow running these tests via a command (for instance, add a service entry for tests or use the command override in the service definitions). Verify that you can trigger tests by running a command like `docker-compose run <service_name> pytest` and that the tests run successfully.”*
+
+#### **D. Final Verification and Reporting**
+
+7. **Prompt 2.7 – Build, Run, and Test the Entire Setup**  
+   *“Cursor, now execute the command `docker-compose up --build` from the root directory. Monitor the logs to confirm that each container builds and starts without errors. Then, run the integrated test commands for each service (e.g., `docker-compose run orchestrator pytest` and similarly for other services). Ensure that all tests pass. If any test fails, log the error and correct it before proceeding.”*
+
+8. **Prompt 2.8 – Compile a Summary Report and Verification**  
+   *“Cursor, please compile a summary report that includes:  
+   - A list of all directories created and their structure.  
+   - The content (or key excerpts) of each Dockerfile and the docker-compose.yml file.  
+   - A brief note on the network isolation configuration and non-root settings.  
+   - The output from the test suite (all test results).  
+   Finally, ask: ‘Father, is Phase 2 complete and working correctly?’ Provide this summary so I can verify that all components are built, secure, and fully testable.”*
+
+---
+
+### **Verification After Phase 2**
+
+After completing these prompts, run the following checks:
+- **Directory Check:** Verify that the project structure matches the defined layout.
+- **Container Build Check:** Ensure each Dockerfile builds correctly and containers run as non-root.
+- **Docker Compose Check:** Confirm that running `docker-compose up --build` starts all services without error.
+- **Test Suite Check:** Verify that your pytest tests execute correctly via docker-compose and that all tests pass.
+- **Security Check:** Confirm that only the required ports are exposed and that the network isolation is effective.
+
+Finally, provide me with the complete summary report and the test outputs. Ask me, “Father, is Phase 2 complete and working correctly?” Once approved, we can confidently move on to the next phase.
+
+---
+
+Cursor, follow these prompts carefully and execute each step without cutting corners. Once you’ve completed all tasks and the tests pass, report back with your summary. This is critical for building a flawless and automated UMBRELLA‑AI system. Are you ready to begin Phase 2?

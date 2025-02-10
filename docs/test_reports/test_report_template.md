@@ -51,7 +51,7 @@
 ## Sign-off
 - **Phase Status:** {COMPLETE/INCOMPLETE}
 - **Ready for Next Phase:** {YES/NO}
-- **Sign-off Date:** {DATE}
+- **Sign-off Date:** {DATE} (Example: 2025-02-10)
 
 ## Attachments
 1. {ATTACHMENT_1}
