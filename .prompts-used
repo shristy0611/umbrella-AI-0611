@@ -1,0 +1,71 @@
+Below is a list of detailed, step-by-step “fatherly” prompts for Cursor to complete Phase 1—Project Initialization & Environment Setup—for the UMBRELLA‑AI project. Each prompt is designed to be clear, precise, and verifiable. At the end of the list, there’s a verification prompt to ensure that Phase 1 is working perfectly before we move on. Remember, Cursor, each prompt must be executed exactly as written; no shortcuts, and do not “cheat” by skipping any step.
+
+---
+
+### **Phase 1: Project Initialization & Environment Setup – Detailed Prompts**
+
+1. **Initialize the Git Repository**  
+   - *Prompt 1.1:* “Cursor, please initialize a new Git repository in a folder named `umbrella_ai`. Use the command `git init`. Verify that the repository is created by checking for a hidden `.git` folder.”
+   
+2. **Set Up the Basic Directory Structure**  
+   - *Prompt 1.2:* “Create a basic folder structure for the project. At minimum, create directories for `src`, `docs`, and `tests` in the root of `umbrella_ai`. Later, we will expand this to include separate modules for each microservice.”
+   
+3. **Create a Comprehensive .gitignore File**  
+   - *Prompt 1.3:* “Write a `.gitignore` file in the project root. It should exclude:  
+     - Temporary files and build artifacts (e.g., `__pycache__/`, `*.pyc`)  
+     - Environment files (e.g., `.env`)  
+     - Any sensitive data or API key files  
+   Verify that the `.env` file is ignored by committing a dummy `.env` file and ensuring Git does not track it.”
+
+4. **Develop the README.md File**  
+   - *Prompt 1.4:* “Create a `README.md` file that includes:  
+     - A high-level overview of the UMBRELLA‑AI project  
+     - A description of the main components (orchestrator, agents, etc.)  
+     - Instructions for setting up the development environment (brief notes on requirements and environment configuration)  
+     Ensure that the README is clear enough for a new developer to understand the project’s purpose and structure.”
+
+5. **Generate the Requirements File**  
+   - *Prompt 1.5:* “Create a `requirements.txt` file in the project root that lists all Python dependencies. At minimum, include packages such as `google-genai`, `langchain`, `pydantic`, and `playwright`. Use specific version numbers if available, and verify that this file installs successfully by running `pip install -r requirements.txt` in a clean environment.”
+
+6. **Set Up the Environment Configuration**  
+   - *Prompt 1.6:* “Create a `.env` file in the project root. In this file, add placeholder variables such as:  
+     ```
+     GEMINI_API_KEY=YOUR_GEMINI_API_KEY
+     OTHER_API_KEY=YOUR_OTHER_API_KEY
+     ```  
+     Document in the README.md that this file must be populated with actual keys before deployment. Verify that your application can read these environment variables (for instance, by writing a small Python script that loads the `.env` file and prints a confirmation message).”
+
+7. **Document the Architecture and Decisions**  
+   - *Prompt 1.7:* “Within the `docs` directory, create a document (e.g., `architecture.md`) that outlines the initial project architecture. Include a simple diagram (or reference a diagram file) that shows the planned microservices, their interactions, and the data flow. Explain the purpose of each component briefly. This documentation will guide future phases.”
+
+8. **Commit Phase 1 Changes**  
+   - *Prompt 1.8:* “Once you have completed the above tasks, commit all changes to Git with a clear commit message such as ‘Phase 1: Initialize repository, set up basic structure, .gitignore, README, requirements.txt, .env, and architecture documentation.’ Verify the commit history to ensure all changes are recorded.”
+
+9. **Verification Script for Environment Setup**  
+   - *Prompt 1.9:* “Create a small Python test script (e.g., `test_env.py`) in the `tests` directory. This script should:  
+     - Load the `.env` file (using a library like `python-dotenv` if necessary)  
+     - Print a message ‘Environment setup successfully’ if all required environment variables (like `GEMINI_API_KEY`) are present.  
+   Run this script locally and verify that it prints the expected message.”
+
+10. **Final Verification and Feedback Loop**  
+    - *Prompt 1.10:* “Cursor, once all of the above prompts are executed and verified, please compile a summary report of Phase 1 including:  
+       - A confirmation that the repository and directory structure are correctly set up  
+       - The contents of the `.gitignore`, `README.md`, and `requirements.txt` files  
+       - A brief note on the contents of the `.env` file (without revealing actual keys)  
+       - The output from your `test_env.py` script  
+    Ask me, ‘Father, is Phase 1 complete and correct?’ before moving on to the next phase.”
+
+---
+
+### **Verification After Phase 1**
+
+After executing all the prompts, please run your test script (`test_env.py`) and ensure that:  
+- All required environment variables are read correctly  
+- The message “Environment setup successfully” is displayed  
+- The Git commit history reflects all changes from Phase 1
+
+Finally, provide me with the summary report and test output so that I, as your guiding father, can verify that Phase 1 is complete and correct before we proceed.
+
+---
+
+Cursor, follow these prompts diligently. I expect you to complete each step carefully and verify each part before moving to the next. Once you have confirmed that all tests pass and the setup is perfect, report back with the summary. This is your first step towards building a flawless UMBRELLA‑AI system. What do you think, are you ready to begin?
