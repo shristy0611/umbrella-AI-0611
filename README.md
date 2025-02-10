@@ -64,15 +64,42 @@ UMBRELLA-AI is a sophisticated multi-agent AI system designed to provide enterpr
 
 4. **Environment Configuration**
    - Copy `.env.example` to `.env`
-   - Add your API keys and configuration:
-     - GEMINI_API_KEY_OCR
-     - GEMINI_API_KEY_RECOMMENDATION
-     - GEMINI_API_KEY_SENTIMENT
-     - GEMINI_API_KEY_CHATBOT
-     - ORCHESTRATOR_API_KEY
-     - Other service-specific configurations
+   ```bash
+   cp .env.example .env
+   ```
+   - Configure the following environment variables in `.env`:
+     - **Gemini API Keys** (Required for AI Services)
+       - `GEMINI_API_KEY_OCR`: For document processing
+       - `GEMINI_API_KEY_RECOMMENDATION`: For recommendation engine
+       - `GEMINI_API_KEY_SENTIMENT`: For sentiment analysis
+       - `GEMINI_API_KEY_CHATBOT`: For chatbot service
+       - `ORCHESTRATOR_API_KEY`: For task orchestration
+       - `TASK_DECOMPOSER_API_KEY`: For task decomposition
+       - `RESULT_VERIFIER_API_KEY`: For result verification
+     - **Database Configuration**
+       - `MONGODB_URI`: MongoDB connection string
+       - `VECTOR_DB_PATH`: Path to vector database storage
+     - **AWS Configuration** (Required for Production)
+       - `AWS_ACCESS_KEY_ID`: AWS access key
+       - `AWS_SECRET_ACCESS_KEY`: AWS secret key
+       - `AWS_REGION`: AWS region for deployment
+     - **API Configuration**
+       - `API_HOST`: API host address
+       - `API_PORT`: API port number
+       - `API_DEBUG`: Debug mode flag
+     - **Security**
+       - `JWT_SECRET_KEY`: Secret key for JWT tokens
+       - `JWT_ALGORITHM`: JWT encryption algorithm
+       - `ACCESS_TOKEN_EXPIRE_MINUTES`: Token expiration time
 
-5. **Start Development Services**
+   > ⚠️ **Important**: Never commit the `.env` file to version control. It contains sensitive credentials and should be kept secure.
+
+5. **Verify Environment Setup**
+   ```bash
+   python tests/unit/test_env.py
+   ```
+
+6. **Start Development Services**
    ```bash
    docker-compose up -d
    ```
