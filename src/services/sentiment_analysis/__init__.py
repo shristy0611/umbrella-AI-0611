@@ -2,4 +2,4 @@
 
 from .service import SentimentAnalysisService
 
-__all__ = ['SentimentAnalysisService']
+__all__ = ["SentimentAnalysisService"]

@@ -2,4 +2,4 @@
 
 from .service import RAGScraperService
 
-__all__ = ['RAGScraperService']
+__all__ = ["RAGScraperService"]

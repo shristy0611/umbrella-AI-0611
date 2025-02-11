@@ -104,3 +104,10 @@ mkdocstrings>=0.23.0
 tenacity>=8.2.0
 aiofiles>=23.2.0
 tqdm>=4.66.0
+
+# Testing dependencies
+pytest-xdist>=3.3.0
+pytest-timeout>=2.1.0
+
+# Utility dependencies
+structlog>=23.1.0

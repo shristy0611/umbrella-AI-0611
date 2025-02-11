@@ -6,8 +6,8 @@ from .rag_scraper.service import RAGScraperService
 from .chatbot.service import ChatbotService
 
 __all__ = [
-    'PDFExtractionService',
-    'SentimentAnalysisService',
-    'RAGScraperService',
-    'ChatbotService'
-] 
+    "PDFExtractionService",
+    "SentimentAnalysisService",
+    "RAGScraperService",
+    "ChatbotService",
+]

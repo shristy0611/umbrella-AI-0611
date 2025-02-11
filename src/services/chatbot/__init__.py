@@ -2,4 +2,4 @@
 
 from .service import ChatbotService
 
-__all__ = ['ChatbotService']
+__all__ = ["ChatbotService"]

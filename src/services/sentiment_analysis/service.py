@@ -1,262 +1,248 @@
-"""Sentiment analysis service implementation."""
+"""Sentiment analysis service for UMBRELLA-AI."""
 
-import os
-from typing import Dict, Any, List
-import google.generativeai as genai
 import logging
-from datetime import datetime
-
+import asyncio
+from typing import Dict, Any, List, Optional
+import google.generativeai as genai
 from src.shared.base_service import BaseService
 from src.shared.api_config import api_config
+from src.shared.gemini_config import gemini_config
+from datetime import datetime
+from fastapi import APIRouter
+import json
+import re
 
 logger = logging.getLogger(__name__)
 
+router = APIRouter()
+
+
 class SentimentAnalysisService(BaseService):
-    """Service for analyzing sentiment in text."""
-    
+    """Service for sentiment analysis using Gemini."""
+
     def __init__(self):
         """Initialize sentiment analysis service."""
         super().__init__("sentiment_analysis")
         self.model = None
-    
+
     async def initialize(self) -> None:
         """Initialize the service and configure Gemini API."""
         try:
             # Initialize API configuration
             await api_config.initialize()
-            
-            # Get API key for sentiment analysis service
-            api_key = await api_config.get_api_key("SENTIMENT")
-            
-            # Configure Gemini
-            genai.configure(api_key=api_key)
-            self.model = genai.GenerativeModel('gemini-pro')
-            
-            await super().initialize()
+
+            # Configure Gemini model
+            self.model = gemini_config.configure_model("SENTIMENT")
+
+            self._initialized = True
             logger.info("Sentiment analysis service initialized successfully")
-            
+
         except Exception as e:
             logger.error(f"Failed to initialize sentiment analysis service: {str(e)}")
             raise
-    
+
     async def cleanup(self) -> None:
         """Clean up service resources."""
         self.model = None
         await super().cleanup()
-    
-    async def process(self, request: Dict[str, Any]) -> Dict[str, Any]:
-        """Process sentiment analysis request.
+
+    async def health_check(self) -> Dict[str, str]:
+        """Check service health.
         
+        Returns:
+            Dict[str, str]: Health status
+        """
+        return {
+            "status": "healthy" if self._initialized and self.model is not None else "unhealthy"
+        }
+
+    async def validate_request(self, request: Dict[str, Any]) -> bool:
+        """Validate sentiment analysis request.
+
+        Args:
+            request: Request to validate
+
+        Returns:
+            bool: True if request is valid
+        """
+        if "text" not in request:
+            return False
+        if not isinstance(request["text"], str):
+            return False
+        return True
+
+    async def process(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a sentiment analysis request.
+
         Args:
             request: Dictionary containing:
                 - text: Text to analyze
-                - granularity: Analysis granularity (document, paragraph, sentence)
-                - aspects: Optional list of aspects to analyze
-                
+                - include_analysis: Whether to include detailed analysis (default: False)
+
         Returns:
             Dict[str, Any]: Analysis results
-            
+
         Raises:
             ValueError: If request is invalid or processing fails
         """
         try:
-            # Get parameters
+            # Get request parameters
             text = request["text"]
-            granularity = request.get("granularity", "document")
-            aspects = request.get("aspects", [])
-            
-            results = {
-                "sentiment": {},
-                "aspects": {}
-            }
-            
-            # Analyze overall sentiment with retry
-            if granularity == "document":
-                results["sentiment"] = await api_config.execute_with_retry(
-                    self._analyze_sentiment,
-                    text
-                )
-            elif granularity == "paragraph":
-                paragraphs = text.split("\n\n")
-                results["sentiment"] = [
-                    await api_config.execute_with_retry(
-                        self._analyze_sentiment,
-                        p
-                    )
-                    for p in paragraphs if p.strip()
-                ]
-            elif granularity == "sentence":
-                sentences = text.split(".")
-                results["sentiment"] = [
-                    await api_config.execute_with_retry(
-                        self._analyze_sentiment,
-                        s
-                    )
-                    for s in sentences if s.strip()
-                ]
-            else:
-                raise ValueError(f"Invalid granularity: {granularity}")
-            
-            # Analyze aspect-specific sentiment
-            if aspects:
-                for aspect in aspects:
-                    results["aspects"][aspect] = await api_config.execute_with_retry(
-                        self._analyze_aspect,
-                        text,
-                        aspect
-                    )
-            
+            include_analysis = request.get("include_analysis", False)
+
+            # Analyze sentiment
+            result = await self._analyze_sentiment(text, include_analysis)
+
             return {
                 "status": "success",
-                "results": results,
+                **result,
                 "metadata": {
                     "timestamp": datetime.now().isoformat(),
                     "service": self.service_name,
-                    "granularity": granularity
-                }
+                },
             }
-            
+
         except Exception as e:
             logger.error(f"Sentiment analysis failed: {str(e)}")
-            return {
-                "status": "error",
-                "error": str(e),
-                "service": self.service_name
-            }
-    
-    async def _analyze_sentiment(self, text: str) -> Dict[str, Any]:
+            return {"status": "error", "error": str(e), "service": self.service_name}
+
+    async def _analyze_sentiment(
+        self, text: str, include_analysis: bool
+    ) -> Dict[str, Any]:
         """Analyze sentiment of text.
-        
+
         Args:
             text: Text to analyze
-            
+            include_analysis: Whether to include detailed analysis
+
         Returns:
-            Dict[str, Any]: Sentiment analysis
+            Dict[str, Any]: Sentiment analysis result
         """
-        prompt = self._create_sentiment_prompt(text)
-        response = await self.model.generate_content(prompt)
-        
         try:
-            # Parse structured response
-            analysis = response.text.strip()
-            if not analysis:
-                raise ValueError("Empty response from model")
-            
-            # Extract sentiment score and label
-            if "positive" in analysis.lower():
-                score = 0.8
-                label = "positive"
-            elif "negative" in analysis.lower():
-                score = 0.2
-                label = "negative"
-            else:
-                score = 0.5
-                label = "neutral"
-            
-            # Extract confidence and key phrases
-            confidence = 0.9  # TODO: Implement proper confidence scoring
-            key_phrases = self._extract_key_phrases(analysis)
-            
-            return {
-                "score": score,
-                "label": label,
-                "confidence": confidence,
-                "key_phrases": key_phrases,
-                "analysis": analysis
-            }
-            
+            # Build prompt
+            prompt = self._build_sentiment_prompt(text, include_analysis)
+
+            # Generate response using synchronous call in executor
+            loop = asyncio.get_event_loop()
+            response = await loop.run_in_executor(
+                None,
+                lambda: self.model.generate_content(
+                    prompt,
+                    generation_config=gemini_config.get_generation_config("SENTIMENT")
+                )
+            )
+
+            # Parse response
+            result = self._parse_sentiment_response(response.text)
+
+            if include_analysis:
+                # Generate detailed analysis
+                analysis_prompt = self._build_analysis_prompt(text, result["sentiment_score"])
+                analysis_response = await loop.run_in_executor(
+                    None,
+                    lambda: self.model.generate_content(
+                        analysis_prompt,
+                        generation_config=gemini_config.get_generation_config("SENTIMENT")
+                    )
+                )
+                result["analysis"] = analysis_response.text.strip()
+
+            return result
+
         except Exception as e:
-            raise ValueError(f"Failed to parse sentiment analysis: {str(e)}")
-    
-    async def _analyze_aspect(self, text: str, aspect: str) -> Dict[str, Any]:
-        """Analyze sentiment for specific aspect.
-        
+            logger.error(f"Error analyzing sentiment: {str(e)}")
+            raise
+
+    def _build_sentiment_prompt(self, text: str, include_analysis: bool) -> str:
+        """Build sentiment analysis prompt.
+
         Args:
             text: Text to analyze
-            aspect: Aspect to analyze
-            
+            include_analysis: Whether to include detailed analysis
+
         Returns:
-            Dict[str, Any]: Aspect sentiment analysis
+            str: Generated prompt
         """
-        prompt = self._create_aspect_prompt(text, aspect)
-        response = await self.model.generate_content(prompt)
-        
+        prompt = f"""Analyze the sentiment of the following text and return a JSON object with:
+1. sentiment_score: A float between -1.0 (very negative) and 1.0 (very positive)
+2. sentiment_label: One of ["negative", "neutral", "positive"]
+
+Text to analyze:
+{text}
+
+Format your response as valid JSON. Example:
+{{
+    "sentiment_score": 0.8,
+    "sentiment_label": "positive"
+}}"""
+
+        return prompt
+
+    def _build_analysis_prompt(self, text: str, sentiment_score: float) -> str:
+        """Build detailed analysis prompt.
+
+        Args:
+            text: Text to analyze
+            sentiment_score: Previously calculated sentiment score
+
+        Returns:
+            str: Generated prompt
+        """
+        return f"""Given the text and its sentiment score of {sentiment_score}, provide a detailed analysis explaining:
+1. Key words/phrases that influenced the sentiment
+2. Any nuances or mixed sentiments
+3. Overall tone and emotional content
+
+Text to analyze:
+{text}
+
+Provide your analysis in a clear, concise format."""
+
+    def _parse_sentiment_response(self, response_text: str) -> Dict[str, Any]:
+        """Parse sentiment analysis response.
+
+        Args:
+            response_text: Raw response text
+
+        Returns:
+            Dict[str, Any]: Parsed sentiment result
+        """
         try:
-            analysis = response.text.strip()
-            if not analysis:
-                raise ValueError("Empty response from model")
+            # Try to parse as JSON
+            result = json.loads(response_text)
             
-            # Extract sentiment for aspect
-            if "positive" in analysis.lower():
-                score = 0.8
-                label = "positive"
-            elif "negative" in analysis.lower():
-                score = 0.2
-                label = "negative"
-            else:
-                score = 0.5
-                label = "neutral"
-            
+            # Validate required fields
+            if "sentiment_score" not in result or "sentiment_label" not in result:
+                raise ValueError("Missing required fields in response")
+
+            # Ensure score is float between -1 and 1
+            score = float(result["sentiment_score"])
+            result["sentiment_score"] = max(-1.0, min(1.0, score))
+
+            # Validate sentiment label
+            valid_labels = ["negative", "neutral", "positive"]
+            if result["sentiment_label"] not in valid_labels:
+                result["sentiment_label"] = "neutral"
+
+            return result
+
+        except json.JSONDecodeError:
+            # If JSON parsing fails, try to extract values using regex
+            score_match = re.search(r'sentiment_score"?\s*:\s*(-?\d+\.?\d*)', response_text)
+            label_match = re.search(r'sentiment_label"?\s*:\s*"(\w+)"', response_text)
+
+            if not score_match or not label_match:
+                raise ValueError("Could not parse sentiment values from response")
+
+            score = float(score_match.group(1))
+            label = label_match.group(1)
+
             return {
-                "score": score,
-                "label": label,
-                "analysis": analysis
+                "sentiment_score": max(-1.0, min(1.0, score)),
+                "sentiment_label": label if label in ["negative", "neutral", "positive"] else "neutral"
             }
-            
-        except Exception as e:
-            raise ValueError(f"Failed to parse aspect analysis: {str(e)}")
-    
-    def _create_sentiment_prompt(self, text: str) -> str:
-        """Create prompt for sentiment analysis.
-        
-        Args:
-            text: Text to analyze
-            
-        Returns:
-            str: Analysis prompt
-        """
-        return f"""Analyze the sentiment of the following text. Consider the overall tone, emotion, and key phrases that indicate sentiment. Provide a detailed analysis:
 
-Text: {text}
 
-Please provide:
-1. Overall sentiment (positive, negative, or neutral)
-2. Key phrases that indicate sentiment
-3. Brief explanation of the analysis"""
-    
-    def _create_aspect_prompt(self, text: str, aspect: str) -> str:
-        """Create prompt for aspect-specific analysis.
-        
-        Args:
-            text: Text to analyze
-            aspect: Aspect to analyze
-            
-        Returns:
-            str: Analysis prompt
-        """
-        return f"""Analyze the sentiment specifically related to the aspect "{aspect}" in the following text:
-
-Text: {text}
-
-Please provide:
-1. Sentiment towards {aspect} (positive, negative, or neutral)
-2. Brief explanation of why"""
-    
-    def _extract_key_phrases(self, analysis: str) -> List[str]:
-        """Extract key phrases from analysis.
-        
-        Args:
-            analysis: Analysis text
-            
-        Returns:
-            List[str]: Key phrases
-        """
-        # TODO: Implement more sophisticated key phrase extraction
-        phrases = []
-        lines = analysis.split("\n")
-        for line in lines:
-            if "key phrase" in line.lower() or ":" in line:
-                phrase = line.split(":")[-1].strip()
-                if phrase:
-                    phrases.append(phrase)
-        return phrases[:5]  # Return top 5 phrases 
+@router.get("/health")
+async def health_check():
+    return {"status": "healthy"}

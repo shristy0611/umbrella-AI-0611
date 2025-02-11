@@ -4,6 +4,7 @@ import os
 from typing import Dict, Any, List
 from pydantic_settings import BaseSettings
 
+
 class APIConfig(BaseSettings):
     # API Keys
     GEMINI_API_KEY_OCR: str = ""
@@ -60,7 +61,9 @@ class APIConfig(BaseSettings):
     OTEL_EXPORTER_OTLP_ENDPOINT: str = "http://otel-collector:4317"
 
     # Testing Configuration
-    PYTEST_ADDOPTS: str = "--html=test-reports/report.html --cov=src --cov-report=html:test-reports/coverage"
+    PYTEST_ADDOPTS: str = (
+        "--html=test-reports/report.html --cov=src --cov-report=html:test-reports/coverage"
+    )
 
     # Service Ports
     PDF_EXTRACTION_PORT: int = 8001
@@ -116,73 +119,59 @@ class APIConfig(BaseSettings):
 
     def get_service_url(self, service_name: str) -> str:
         """Get the URL for a specific service.
-        
+
         Args:
             service_name: Name of the service
-            
+
         Returns:
             str: Service URL
-            
+
         Raises:
             ValueError: If service name is invalid
         """
         service_urls = {
-            'pdf': self.PDF_SERVICE_URL,
-            'sentiment': self.SENTIMENT_SERVICE_URL,
-            'chatbot': self.CHATBOT_SERVICE_URL,
-            'scraper': self.SCRAPER_SERVICE_URL,
-            'vector_db': self.VECTOR_DB_URL
+            "pdf": self.PDF_SERVICE_URL,
+            "sentiment": self.SENTIMENT_SERVICE_URL,
+            "chatbot": self.CHATBOT_SERVICE_URL,
+            "scraper": self.SCRAPER_SERVICE_URL,
+            "vector_db": self.VECTOR_DB_URL,
         }
-        
+
         if service_name not in service_urls:
             raise ValueError(f"Invalid service name: {service_name}")
-        
+
         return service_urls[service_name]
 
     def get_service_config(self, service_name: str) -> Dict[str, Any]:
         """Get configuration for a specific service.
-        
+
         Args:
             service_name: Name of the service
-            
+
         Returns:
             Dict[str, Any]: Service configuration
-            
+
         Raises:
             ValueError: If service name is invalid
         """
         base_config = {
-            'max_retries': self.MAX_RETRIES,
-            'timeout': self.TIMEOUT_SECONDS,
-            'batch_size': self.BATCH_SIZE
+            "max_retries": self.MAX_RETRIES,
+            "timeout": self.TIMEOUT_SECONDS,
+            "batch_size": self.BATCH_SIZE,
         }
-        
+
         service_configs = {
-            'pdf': {
-                'url': self.PDF_SERVICE_URL,
-                **base_config
-            },
-            'sentiment': {
-                'url': self.SENTIMENT_SERVICE_URL,
-                **base_config
-            },
-            'chatbot': {
-                'url': self.CHATBOT_SERVICE_URL,
-                **base_config
-            },
-            'scraper': {
-                'url': self.SCRAPER_SERVICE_URL,
-                **base_config
-            },
-            'vector_db': {
-                'url': self.VECTOR_DB_URL,
-                **base_config
-            }
+            "pdf": {"url": self.PDF_SERVICE_URL, **base_config},
+            "sentiment": {"url": self.SENTIMENT_SERVICE_URL, **base_config},
+            "chatbot": {"url": self.CHATBOT_SERVICE_URL, **base_config},
+            "scraper": {"url": self.SCRAPER_SERVICE_URL, **base_config},
+            "vector_db": {"url": self.VECTOR_DB_URL, **base_config},
         }
-        
+
         if service_name not in service_configs:
             raise ValueError(f"Invalid service name: {service_name}")
-        
+
         return service_configs[service_name]
 
-api_config = APIConfig() 
+
+api_config = APIConfig()

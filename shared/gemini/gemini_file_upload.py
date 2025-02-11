@@ -7,33 +7,34 @@ import google.generativeai as genai
 from google.generativeai.types import GenerateContentResponse
 from .utils import async_retry_with_backoff, logger
 
+
 class GeminiFileUpload:
     def __init__(self):
         """Initialize the Gemini file upload and content generation module."""
-        api_key = os.getenv('GEMINI_API_KEY')
+        api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY environment variable not set")
         genai.configure(api_key=api_key)
-        self.model = genai.GenerativeModel('gemini-pro')
-        self._logger = logger.getChild('file_upload')
+        self.model = genai.GenerativeModel("gemini-pro")
+        self._logger = logger.getChild("file_upload")
 
     @async_retry_with_backoff()
     async def process_file(
         self,
         file_path: Union[str, BinaryIO],
         prompt: str,
-        mime_type: Optional[str] = None
+        mime_type: Optional[str] = None,
     ) -> GenerateContentResponse:
         """Upload a file and generate content based on it using retry mechanism.
-        
+
         Args:
             file_path: Path to file or file-like object
             prompt: Text prompt to guide the content generation
             mime_type: Optional MIME type of the file. If not provided, will be guessed
-            
+
         Returns:
             GenerateContentResponse: The response from Gemini API
-            
+
         Raises:
             ValueError: If file upload fails
             RuntimeError: If API call fails after retries
@@ -46,7 +47,7 @@ class GeminiFileUpload:
             # Handle file path or file-like object
             if isinstance(file_path, str):
                 self._logger.info(f"Reading file from path: {file_path}")
-                with open(file_path, 'rb') as f:
+                with open(file_path, "rb") as f:
                     file_content = f.read()
                 if not mime_type:
                     mime_type = mimetypes.guess_type(file_path)[0]
@@ -58,10 +59,7 @@ class GeminiFileUpload:
                     raise ValueError("mime_type must be provided for file-like objects")
 
             # Upload file to Gemini
-            file_parts = [{
-                'data': file_content,
-                'mime_type': mime_type
-            }]
+            file_parts = [{"data": file_content, "mime_type": mime_type}]
 
             # Generate content using the uploaded file
             self._logger.info(f"Processing file with prompt: {prompt[:50]}...")
@@ -78,18 +76,17 @@ class GeminiFileUpload:
 
     @staticmethod
     def validate_file(
-        file_path: Union[str, BinaryIO],
-        mime_type: Optional[str] = None
+        file_path: Union[str, BinaryIO], mime_type: Optional[str] = None
     ) -> bool:
         """Validate that a file can be processed.
-        
+
         Args:
             file_path: Path to file or file-like object
             mime_type: Optional MIME type of the file
-            
+
         Returns:
             bool: True if file is valid
-            
+
         Raises:
             ValueError: If file is invalid
         """
@@ -101,10 +98,10 @@ class GeminiFileUpload:
                     mime_type = mimetypes.guess_type(file_path)[0]
                     if not mime_type:
                         raise ValueError("Could not determine file type")
-            elif not hasattr(file_path, 'read'):
+            elif not hasattr(file_path, "read"):
                 raise ValueError("Invalid file object")
             elif not mime_type:
                 raise ValueError("mime_type must be provided for file-like objects")
             return True
         except Exception as e:
-            raise ValueError(f"Invalid file: {str(e)}") 
+            raise ValueError(f"Invalid file: {str(e)}")

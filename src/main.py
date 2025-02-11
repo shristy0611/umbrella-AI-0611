@@ -19,7 +19,7 @@ from .services import (
     ChatbotService,
     RAGScraperService,
     VectorDBService,
-    OrchestratorService
+    OrchestratorService,
 )
 
 # Configure logging
@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 app = FastAPI(
     title="UMBRELLA-AI",
     description="Multi-agent system for document analysis and interaction",
-    version="1.0.0"
+    version="1.0.0",
 )
 
 # Add CORS middleware
@@ -47,6 +47,7 @@ setup_middleware(app, "umbrella_ai")
 
 # Initialize service registry
 registry = ServiceRegistry()
+
 
 # Register services
 def init_services():
@@ -73,15 +74,18 @@ def init_services():
         logger.error(f"Error initializing services: {str(e)}")
         raise
 
+
 @app.on_event("startup")
 async def startup_event():
     """Initialize services on startup."""
     init_services()
 
+
 @app.on_event("shutdown")
 async def shutdown_event():
     """Clean up resources on shutdown."""
     logger.info("Shutting down UMBRELLA-AI")
+
 
 @app.get("/health")
 async def health_check() -> Dict[str, Any]:
@@ -92,7 +96,7 @@ async def health_check() -> Dict[str, Any]:
         "chatbot": "http://localhost:8003/health",
         "rag_scraper": "http://localhost:8004/health",
         "vector_db": "http://localhost:8005/health",
-        "orchestrator": "http://localhost:8006/health"
+        "orchestrator": "http://localhost:8006/health",
     }
 
     service_statuses = {}
@@ -115,14 +119,16 @@ async def health_check() -> Dict[str, Any]:
     return {
         "status": overall_status,
         "timestamp": datetime.now().isoformat(),
-        "services": service_statuses
+        "services": service_statuses,
     }
+
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "main:app",
         host=os.getenv("API_HOST", "0.0.0.0"),
         port=int(os.getenv("API_PORT", 8000)),
-        reload=os.getenv("API_DEBUG", "false").lower() == "true"
-    ) 
+        reload=os.getenv("API_DEBUG", "false").lower() == "true",
+    )
