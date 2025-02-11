@@ -1,0 +1,59 @@
+groups:
+  - name: UmbrellaAI
+    rules:
+      - alert: HighErrorRate
+        expr: |
+          rate(http_requests_total{status=~"5.."}[5m]) 
+          / 
+          rate(http_requests_total[5m]) 
+          > 0.1
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: High error rate detected
+          description: "Service {{ $labels.service }} has error rate above 10% (current value: {{ $value }})"
+
+      - alert: SlowResponseTime
+        expr: |
+          rate(http_request_duration_seconds_sum[5m]) 
+          / 
+          rate(http_request_duration_seconds_count[5m]) 
+          > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: Slow response time detected
+          description: "Service {{ $labels.service }} has average response time above 2s (current value: {{ $value }}s)"
+
+      - alert: HighCPUUsage
+        expr: rate(process_cpu_seconds_total[5m]) > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High CPU usage detected
+          description: "Service {{ $labels.service }} is using high CPU (current value: {{ $value * 100 }}%)"
+
+      - alert: HighMemoryUsage
+        expr: process_resident_memory_bytes / process_virtual_memory_bytes > 0.8
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: High memory usage detected
+          description: "Service {{ $labels.service }} is using high memory (current value: {{ $value * 100 }}%)"
+
+      - alert: TestFailureRate
+        expr: |
+          rate(test_runs_total{status="failed"}[1h])
+          /
+          rate(test_runs_total[1h])
+          > 0.1
+        for: 15m
+        labels:
+          severity: critical
+        annotations:
+          summary: High test failure rate
+          description: "Test suite has failure rate above 10% in the last hour (current value: {{ $value * 100 }}%)" 
