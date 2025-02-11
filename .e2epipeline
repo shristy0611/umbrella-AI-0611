@@ -201,6 +201,12 @@ print(response.text)
   - Simulate service-to-service interactions: the orchestrator calling each agent and validating the aggregated output.
 - **End-to-End Testing:**  
   - Create staging environments (mirroring production) to run scenario-based tests from user input to final aggregated output.
+- **End-to-End Tests:**  
+  - Run the tests located in `tests/e2e/` to validate full system workflows.  
+    Example command:  
+    ```bash
+    pytest tests/e2e/
+    ```
 - **Load & Stress Testing:**  
   - Use tools like Locust or JMeter to simulate high request volumes and identify bottlenecks.
 - **Continuous Integration/Deployment (CI/CD):**  

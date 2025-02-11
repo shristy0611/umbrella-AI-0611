@@ -1,166 +1,172 @@
-# 🌂 UMBRELLA-AI
+# UMBRELLA-AI
 
-## Overview
+UMBRELLA-AI is a multi-agent AI system for document analysis and interaction, powered by Google's Gemini API.
 
-UMBRELLA-AI is a sophisticated multi-agent AI system designed to provide enterprise-grade AI capabilities at an affordable cost for small and medium-sized businesses. The system leverages Google's Gemini API and modern microservices architecture to deliver automated document analysis, sentiment analysis, recommendations, and intelligent chatbot capabilities.
+## Features
 
-## 🚀 Key Features
+- PDF text extraction and analysis
+- Sentiment analysis
+- RAG-based document retrieval
+- Interactive chat with context awareness
+- Microservices architecture
+- Docker containerization
+- Secure API key management with AWS Secrets Manager
 
-- **Document Analysis**: Automated PDF parsing and data extraction
-- **Sentiment Analysis**: Advanced text sentiment understanding
-- **Smart Recommendations**: AI-powered product and action suggestions
-- **Interactive Chatbot**: Context-aware conversational interface
-- **Web Intelligence**: RAG-based web scraping and information synthesis
+## Architecture
 
-## 🏗️ Architecture
+The system consists of several microservices:
 
-### Core Components
+- **PDF Extraction Service**: Extracts text and metadata from PDF documents
+- **Sentiment Analysis Service**: Analyzes sentiment in text
+- **RAG Scraper Service**: Retrieves relevant documents and context
+- **Chatbot Service**: Handles interactive conversations
+- **API Gateway**: Main entry point for client applications
 
-1. **Orchestrator Service**
-   - Central coordinator for all AI agents
-   - Task decomposition and distribution
-   - Request routing and response aggregation
+## Prerequisites
 
-2. **Specialized AI Agents**
-   - **PDF Extraction Agent**: Document parsing and structured data extraction
-   - **Sentiment Analysis Agent**: Text sentiment and emotion analysis
-   - **Recommendation Agent**: Intelligent suggestion system
-   - **Chatbot Agent**: Natural language interaction handler
-   - **RAG Scraper Agent**: Web data collection and processing
-
-3. **Infrastructure**
-   - Docker containerization for each service
-   - AWS cloud deployment
-   - Secure API management
-   - Vector database for efficient data storage
-
-## 🛠️ Development Setup
-
-### Prerequisites
-
-- Python 3.8+
+- Python 3.11+
 - Docker and Docker Compose
-- AWS Account (for deployment)
-- Gemini API access
+- Google Gemini API key
+- AWS account with Secrets Manager access (for production)
 
-### Environment Setup
+## Installation
 
-1. **Clone the Repository**
-   ```bash
-   git clone [repository-url]
-   cd umbrella-ai
-   ```
-
-2. **Create Virtual Environment**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   ```
-
-3. **Install Dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-4. **Environment Configuration**
-   - Copy `.env.example` to `.env`
-   ```bash
-   cp .env.example .env
-   ```
-   - Configure the following environment variables in `.env`:
-     - **Gemini API Keys** (Required for AI Services)
-       - `GEMINI_API_KEY_OCR`: For document processing
-       - `GEMINI_API_KEY_RECOMMENDATION`: For recommendation engine
-       - `GEMINI_API_KEY_SENTIMENT`: For sentiment analysis
-       - `GEMINI_API_KEY_CHATBOT`: For chatbot service
-       - `ORCHESTRATOR_API_KEY`: For task orchestration
-       - `TASK_DECOMPOSER_API_KEY`: For task decomposition
-       - `RESULT_VERIFIER_API_KEY`: For result verification
-     - **Database Configuration**
-       - `MONGODB_URI`: MongoDB connection string
-       - `VECTOR_DB_PATH`: Path to vector database storage
-     - **AWS Configuration** (Required for Production)
-       - `AWS_ACCESS_KEY_ID`: AWS access key
-       - `AWS_SECRET_ACCESS_KEY`: AWS secret key
-       - `AWS_REGION`: AWS region for deployment
-     - **API Configuration**
-       - `API_HOST`: API host address
-       - `API_PORT`: API port number
-       - `API_DEBUG`: Debug mode flag
-     - **Security**
-       - `JWT_SECRET_KEY`: Secret key for JWT tokens
-       - `JWT_ALGORITHM`: JWT encryption algorithm
-       - `ACCESS_TOKEN_EXPIRE_MINUTES`: Token expiration time
-
-   > ⚠️ **Important**: Never commit the `.env` file to version control. It contains sensitive credentials and should be kept secure.
-
-5. **Verify Environment Setup**
-   ```bash
-   python tests/unit/test_env.py
-   ```
-
-6. **Start Development Services**
-   ```bash
-   docker-compose up -d
-   ```
-
-## 📁 Project Structure
-
-```
-umbrella_ai/
-├── src/                    # Source code
-│   ├── orchestrator/       # Main orchestration service
-│   ├── pdf_extraction/     # PDF processing agent
-│   ├── sentiment/          # Sentiment analysis agent
-│   ├── recommendation/     # Recommendation agent
-│   ├── chatbot/           # Chatbot service
-│   └── rag_scraper/       # Web scraping agent
-├── docs/                   # Documentation
-│   ├── architecture/      # System design docs
-│   └── api/               # API specifications
-├── tests/                 # Test suites
-│   ├── unit/
-│   ├── integration/
-│   └── e2e/
-└── docker/                # Docker configurations
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/umbrella-ai.git
+cd umbrella-ai
 ```
 
-## 🧪 Testing
+2. Create a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+4. Set up environment variables:
+   - For development, copy `.env.example` to `.env` and fill in your API keys
+   - For production, configure AWS Secrets Manager (see below)
+
+## API Key Management
+
+### Development Environment
+
+In development, API keys are managed through environment variables. Copy `.env.example` to `.env` and configure:
 
 ```bash
-# Run unit tests
-pytest tests/unit
+# Gemini API Keys for Different Services
+GEMINI_API_KEY_OCR=your_ocr_api_key_here
+GEMINI_API_KEY_RECOMMENDATION=your_recommendation_api_key_here
+GEMINI_API_KEY_SENTIMENT=your_sentiment_api_key_here
+GEMINI_API_KEY_CHATBOT=your_chatbot_api_key_here
 
-# Run integration tests
-pytest tests/integration
+# Gemini API Keys for Orchestration
+ORCHESTRATOR_API_KEY=your_orchestrator_api_key_here
+TASK_DECOMPOSER_API_KEY=your_task_decomposer_api_key_here
+RESULT_VERIFIER_API_KEY=your_result_verifier_api_key_here
 
-# Run end-to-end tests
-pytest tests/e2e
+# Default Gemini API Key
+GEMINI_API_KEY=your_default_api_key_here
 ```
 
-## 📚 Documentation
+### Production Environment
 
-- Detailed documentation is available in the `docs/` directory
-- API specifications and examples in `docs/api/`
-- Architecture diagrams in `docs/architecture/`
+In production, API keys are securely managed using AWS Secrets Manager:
 
-## 🔒 Security Notes
+1. Set up AWS credentials:
+```bash
+# AWS Configuration
+AWS_ACCESS_KEY_ID=your_access_key_id
+AWS_SECRET_ACCESS_KEY=your_secret_access_key
+AWS_REGION=your_aws_region
+AWS_SECRET_NAME=umbrella/gemini/api-keys  # Default secret name
+```
 
-- All sensitive credentials should be stored in `.env` (not committed to Git)
-- API keys should be managed through secure key rotation
-- Follow the principle of least privilege for service accounts
+2. Create a secret in AWS Secrets Manager with the following structure:
+```json
+{
+    "ocr_api_key": "your_ocr_api_key",
+    "recommendation_api_key": "your_recommendation_api_key",
+    "sentiment_api_key": "your_sentiment_api_key",
+    "chatbot_api_key": "your_chatbot_api_key",
+    "orchestrator_api_key": "your_orchestrator_api_key",
+    "task_decomposer_api_key": "your_task_decomposer_api_key",
+    "result_verifier_api_key": "your_result_verifier_api_key",
+    "default_api_key": "your_default_api_key"
+}
+```
 
-## 🤝 Contributing
+3. Configure AWS IAM roles with appropriate permissions:
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "secretsmanager:GetSecretValue",
+                "secretsmanager:PutSecretValue",
+                "secretsmanager:RotateSecret"
+            ],
+            "Resource": "arn:aws:secretsmanager:*:*:secret:umbrella/gemini/*"
+        }
+    ]
+}
+```
 
-1. Create a feature branch from `dev`
-2. Make your changes
-3. Write/update tests
-4. Submit a pull request to `dev`
+### Key Rotation
 
-## 📄 License
+API keys can be rotated automatically:
 
-[License details to be added]
+```python
+from shared.gemini.config import gemini_config, ServiceType
 
----
+# Rotate a specific service key
+gemini_config.rotate_api_key(ServiceType.OCR)
 
-For more information or support, please refer to the documentation in the `docs/` directory. 
+# Keys are automatically rotated every 30 days in production
+```
+
+## Development
+
+### Prerequisites
+- Python 3.9+
+- Docker and Docker Compose
+- Gemini API key
+
+### Setup
+1. Clone the repository
+2. Install dependencies: `pip install -r requirements.txt`
+3. Copy `.env.example` to `.env` and configure your environment variables
+4. Run the application: `python app.py`
+
+## Docker Deployment
+
+### Local Development
+1. Build the images: `docker-compose build`
+2. Start the services: `docker-compose up -d`
+3. Check logs: `docker-compose logs -f`
+
+### Production
+1. Configure production environment variables
+2. Deploy using Docker Compose: `docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d`
+
+## Contributing
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/my-feature`
+3. Commit your changes: `git commit -am 'Add my feature'`
+4. Push to the branch: `git push origin feature/my-feature`
+5. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support, please open an issue in the GitHub repository.

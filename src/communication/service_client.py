@@ -1,105 +1,82 @@
-"""HTTP client for service-to-service communication."""
+"""Service client for making HTTP requests to other services."""
 
 import httpx
 import logging
+import asyncio
 from typing import Any, Dict, Optional
-from tenacity import retry, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)
 
 class ServiceClient:
-    """Client for making HTTP requests to other services."""
+    """HTTP client for making requests to services."""
     
-    def __init__(self, base_url: str, service_name: str, timeout: int = 30):
+    def __init__(self, base_url: str, timeout: float = 30.0):
         """Initialize the service client.
         
         Args:
             base_url: Base URL of the service
-            service_name: Name of the service
-            timeout: Request timeout in seconds
+            timeout: Timeout for requests
         """
         self.base_url = base_url.rstrip('/')
-        self.service_name = service_name
         self.timeout = timeout
-        self.client = httpx.AsyncClient(timeout=timeout)
+        self.logger = logging.getLogger(__name__)
     
-    async def close(self):
-        """Close the HTTP client."""
-        await self.client.aclose()
-    
-    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     async def request(
         self,
         method: str,
         endpoint: str,
-        correlation_id: str,
-        data: Optional[Dict[str, Any]] = None,
-        params: Optional[Dict[str, Any]] = None,
-        headers: Optional[Dict[str, Any]] = None
+        *,
+        data: Any = None,
+        json: Any = None,
+        headers: Optional[Dict[str, str]] = None,
+        correlation_id: Optional[str] = None,
+        timeout: Optional[float] = None
     ) -> Dict[str, Any]:
-        """Make an HTTP request to the service.
+        """Make an HTTP request to the service."""
+        url = f"{self.base_url}{endpoint}"
+        timeout = timeout or self.timeout
         
-        Args:
-            method: HTTP method (GET, POST, etc.)
-            endpoint: API endpoint
-            correlation_id: Correlation ID for request tracing
-            data: Request body data
-            params: Query parameters
-            headers: Additional headers
-            
-        Returns:
-            Response data as dictionary
-            
-        Raises:
-            httpx.HTTPError: If the request fails
-        """
-        # Prepare headers
-        request_headers = {
-            "X-Correlation-ID": correlation_id,
+        default_headers = {
             "Content-Type": "application/json",
-            "Accept": "application/json",
-            **(headers or {})
+            "Accept": "application/json"
         }
         
-        # Build full URL
-        url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        if correlation_id:
+            default_headers["X-Correlation-ID"] = correlation_id
+            
+        headers = {**default_headers, **(headers or {})}
         
-        try:
-            # Make request
-            async with httpx.AsyncClient(timeout=self.timeout) as client:
-                response = await client.request(
-                    method=method,
-                    url=url,
-                    json=data,
-                    params=params,
-                    headers=request_headers
-                )
-                
-                # Raise for status
-                response.raise_for_status()
-                
-                logger.info(
-                    f"Request to {self.service_name} successful",
-                    extra={
-                        "service": self.service_name,
-                        "method": method,
-                        "url": url,
-                        "correlation_id": correlation_id,
-                        "status_code": response.status_code
-                    }
-                )
-                
-                return response.json()
-                
-        except httpx.HTTPError as e:
-            logger.error(
-                f"Request to {self.service_name} failed: {str(e)}",
-                extra={
-                    "service": self.service_name,
-                    "method": method,
-                    "url": url,
-                    "correlation_id": correlation_id,
-                    "error": str(e)
-                }
-            )
-            raise 
+        async with httpx.AsyncClient() as client:
+            for attempt in range(3):
+                try:
+                    response = await client.request(
+                        method,
+                        url,
+                        json=json if json is not None else data,
+                        headers=headers,
+                        timeout=timeout
+                    )
+                    response.raise_for_status()
+                    return response.json()
+                except Exception as e:
+                    if attempt == 2:  # Last attempt
+                        self.logger.error(f"Request to {self.base_url} failed after 3 retries: {str(e)}")
+                        raise
+                    self.logger.warning(f"Request to {self.base_url} failed (attempt {attempt + 1}/3). Retrying in {2**attempt}s...")
+                    await asyncio.sleep(2**attempt)
+    
+    async def get(self, endpoint: str, **kwargs) -> Dict[str, Any]:
+        """Make a GET request."""
+        return await self.request("GET", endpoint, **kwargs)
+    
+    async def post(self, endpoint: str, **kwargs) -> Dict[str, Any]:
+        """Make a POST request."""
+        return await self.request("POST", endpoint, **kwargs)
+    
+    async def put(self, endpoint: str, **kwargs) -> Dict[str, Any]:
+        """Make a PUT request."""
+        return await self.request("PUT", endpoint, **kwargs)
+    
+    async def delete(self, endpoint: str, **kwargs) -> Dict[str, Any]:
+        """Make a DELETE request."""
+        return await self.request("DELETE", endpoint, **kwargs) 

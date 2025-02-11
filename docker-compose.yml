@@ -1,82 +1,115 @@
 version: '3.8'
 
 services:
-  orchestrator:
+  # Base image build
+  base:
     build:
-      context: ./orchestrator_service
-      dockerfile: Dockerfile
-    ports:
-      - "8000:8000"
-    environment:
-      - PDF_SERVICE_URL=http://pdf:8001
-      - SENTIMENT_SERVICE_URL=http://sentiment:8002
-      - CHATBOT_SERVICE_URL=http://chatbot:8003
-      - SCRAPER_SERVICE_URL=http://scraper:8004
-      - VECTOR_DB_URL=http://vector_db:8005
-    depends_on:
-      - pdf
-      - sentiment
-      - chatbot
-      - scraper
-      - vector_db
-      - rabbitmq
+      context: .
+      dockerfile: docker/base.Dockerfile
+    image: umbrella-ai-base:latest
 
-  pdf:
+  # PDF Extraction Service
+  pdf_extraction:
     build:
-      context: ./pdf_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/pdf_extraction.Dockerfile
     ports:
       - "8001:8001"
     environment:
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      - ./data:/app/data
+    depends_on:
+      - base
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
-  sentiment:
+  # Sentiment Analysis Service
+  sentiment_analysis:
     build:
-      context: ./sentiment_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/sentiment_analysis.Dockerfile
     ports:
       - "8002:8002"
     environment:
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - base
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
-  chatbot:
+  # RAG Scraper Service
+  rag_scraper:
     build:
-      context: ./chatbot_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/rag_scraper.Dockerfile
     ports:
       - "8003:8003"
     environment:
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
-      - VECTOR_DB_URL=http://vector_db:8005
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - base
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
-  scraper:
+  # Chatbot Service
+  chatbot:
     build:
-      context: ./scraper_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/chatbot.Dockerfile
     ports:
       - "8004:8004"
     environment:
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - base
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
-  vector_db:
+  # Main API Gateway
+  api_gateway:
     build:
-      context: ./vector_db_service
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: docker/api_gateway.Dockerfile
     ports:
-      - "8005:8005"
+      - "8000:8000"
     environment:
-      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
-    volumes:
-      - vector_data:/data
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+    depends_on:
+      - pdf_extraction
+      - sentiment_analysis
+      - rag_scraper
+      - chatbot
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
-  rabbitmq:
-    image: rabbitmq:3-management
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
+networks:
+  default:
+    name: umbrella-ai-network
+    driver: bridge
 
 volumes:
-  vector_data:
+  data:
+    name: umbrella-ai-data

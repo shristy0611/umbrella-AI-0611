@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# Source environment variables
+source .env
+
+# Run linting and formatting checks
+black . --check
+flake8 .
+
+# Run security checks
+bandit -r .
+
+# If all checks pass
+exit 0 

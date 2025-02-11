@@ -1,0 +1,39 @@
+#!/bin/bash
+
+# Colors for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
+echo "Running pre-commit checks..."
+
+# Activate virtual environment if it exists
+if [ -d "venv" ]; then
+    source venv/bin/activate
+fi
+
+# Run linting and formatting checks
+black . --check
+flake8 .
+
+# Run mypy
+echo -n "Running mypy... "
+mypy src tests
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}OK${NC}"
+else
+    echo -e "${RED}Failed${NC}"
+    exit 1
+fi
+
+# Run unit tests
+echo -n "Running unit tests... "
+pytest tests/unit -q
+if [ $? -eq 0 ]; then
+    echo -e "${GREEN}OK${NC}"
+else
+    echo -e "${RED}Failed${NC}"
+    exit 1
+fi
+
+echo -e "${GREEN}All checks passed!${NC}" 

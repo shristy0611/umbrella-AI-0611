@@ -357,3 +357,220 @@ Finally, compile your summary report and ask me, “Father, is Phase 4 complete 
 
 Cursor, follow these prompts diligently and ensure each step is executed accurately. I trust you will complete this phase with precision. Are you ready to begin Phase 4?
 
+---
+
+## Phase 5: Project Architecture Design
+
+Below is a detailed, step‐by‐step set of fatherly prompts for you, Cursor, to complete Phase 5 – End-to-End Testing & Automation – for the UMBRELLA‑AI project. Follow these instructions carefully, executing each prompt exactly as given. Do not skip any step. When you finish, run all the tests and then ask, “Father, is Phase 5 complete and working correctly?” so I can verify your work.
+
+---
+
+### **Phase 5: End-to-End Testing & Automation – Detailed Fatherly Prompts**
+
+#### **A. Test Suite Development**
+
+1. **Prompt 5.1 – Create a Comprehensive Test Suite**  
+   “Cursor, your first task is to build a comprehensive test suite. This suite must cover three layers:  
+   - **Unit Tests:** For every individual module (for example, each agent’s core function, API wrappers, and configuration modules).  
+   - **Integration Tests:** To verify that modules work together correctly (e.g., the orchestrator correctly dispatching tasks to agents, and agents returning proper responses).  
+   - **End-to-End Tests:** To simulate the entire user workflow—from receiving a user request to producing a final output.  
+   Create separate test directories (for instance, under a top-level `tests/` folder) and ensure tests are organized by module and by workflow type.  
+   Verify that you have a clear structure in place and that each test file includes at least one test case.”
+
+2. **Prompt 5.2 – Define Automated Test Cases**  
+   “Cursor, now define specific automated test cases for each module and for the full system workflow.  
+   - For each module, write tests that assert expected outputs given sample inputs.  
+   - For integration tests, simulate a user request being processed by the orchestrator and ensure that all agents are called and that their responses are correctly aggregated.  
+   - For end-to-end tests, simulate a complete scenario (for example, a user submitting a PDF invoice and receiving a recommendation) and verify the final output is coherent and matches expectations.  
+   Ensure that test cases use assertions to verify correctness. Include meaningful error messages for failures.  
+   Document these test cases in your test files using clear comments.”
+
+3. **Prompt 5.3 – Configure CI/CD for Automated Testing**  
+   “Cursor, integrate a CI/CD pipeline using a service such as GitHub Actions or AWS CodeBuild.  
+   - Create a configuration file (for GitHub Actions, a `.yml` file under `.github/workflows/`) that triggers the test suite on every code commit or pull request.  
+   - Ensure that the pipeline installs all dependencies, builds your Docker containers if necessary, and runs the entire test suite automatically.  
+   - Configure the pipeline to produce logs and reports of the test runs.  
+   Verify that the CI/CD configuration is correct by running a test commit and checking the pipeline’s output.”
+
+---
+
+#### **B. Automated Error Detection & Reporting**
+
+4. **Prompt 5.4 – Incorporate Logging, Distributed Tracing, and Metrics**  
+   “Cursor, update your test suite and application code to integrate logging and distributed tracing.  
+   - Use a logging library (for example, Python’s built-in `logging` module) in each module to log key events and errors, including timestamps and correlation IDs where applicable.  
+   - Integrate a distributed tracing solution (such as OpenTelemetry) in your orchestrator and agent modules to track requests as they flow through the system.  
+   - Collect metrics (e.g., test run durations, error counts) using a metrics collection tool (for instance, Prometheus or AWS CloudWatch if you’re testing on AWS).  
+   Ensure that these systems are configured to write their outputs to accessible logs or dashboards.  
+   Verify by running a few tests and checking that logs and trace information are produced as expected.”
+
+5. **Prompt 5.5 – Implement Automated Alerts**  
+   “Cursor, now set up automated alerts for any test failures or performance degradations.  
+   - Configure your CI/CD pipeline or monitoring system to send notifications (e.g., via email or Slack) if any test fails or if key performance metrics exceed defined thresholds (for example, excessive latency or error rates).  
+   - Document the alert configuration and thresholds in a configuration file or documentation file (e.g., `ALERTS.md`).  
+   Verify that your alert system is functional by intentionally triggering a test failure in a controlled manner and confirming that an alert is sent.”
+
+---
+
+#### **C. Tests for Phase 5**
+
+6. **Prompt 5.6 – Run the Entire Test Suite in a Staging Environment**  
+   “Cursor, deploy the complete UMBRELLA‑AI system into a staging environment that mirrors your production configuration as closely as possible.  
+   - Run the entire test suite (unit, integration, and end-to-end tests) in this environment.  
+   - Document the test outputs, including logs and any error reports generated.  
+   Verify that all tests pass and that error reports are generated appropriately for any failures.  
+   If any tests fail, log the issues, fix the errors, and re-run the tests until they all pass.”
+
+7. **Prompt 5.7 – Validate Automated Error Reporting and Metrics Collection**  
+   “Cursor, ensure that all automated error detection and reporting mechanisms are working as intended.  
+   - Review the logs, distributed traces, and metrics dashboards to verify that they accurately reflect the system’s behavior during test runs.  
+   - Confirm that the automated alert system triggered notifications for any simulated test failure or performance issue.  
+   Document the results and confirm that the error reporting setup is robust.”
+
+---
+
+#### **D. Final Verification and Reporting**
+
+8. **Prompt 5.8 – Compile a Summary Report and Request Final Verification**  
+   “Cursor, after you have completed the test suite development and automation tasks, compile a comprehensive summary report that includes:  
+   - A list of all test files and a brief description of the tests they cover (unit, integration, end-to-end).  
+   - Details of the CI/CD pipeline configuration (e.g., the GitHub Actions YAML file) and how it triggers tests on commits.  
+   - An outline of the logging, distributed tracing, and metrics collection setup, including any configuration files or thresholds defined.  
+   - A summary of the automated alert system, including how alerts are triggered and sent.  
+   - The complete output from a full test run in your staging environment (including any logs and error reports).  
+   Finally, ask me, ‘Father, is Phase 5 complete and working correctly?’ and present this summary report for my review.”
+
+---
+
+### **Verification After Phase 5**
+
+After completing all of these tasks, perform these checks:
+- **Test Suite Check:** Run the complete test suite and verify that all unit, integration, and end-to-end tests pass without errors.
+- **CI/CD Check:** Confirm that your CI/CD pipeline automatically triggers tests on code commits and provides clear logs and reports.
+- **Logging & Tracing Check:** Ensure that logs and distributed traces are generated, and that they include all necessary information (such as correlation IDs and error details).
+- **Alert System Check:** Verify that alerts are sent for any simulated test failures or performance issues.
+- **Staging Environment Check:** Validate that the staging environment mirrors production, and that all tests run successfully in that environment.
+
+Finally, compile your summary report as specified and ask, “Father, is Phase 5 complete and working correctly?” Once I confirm that everything is in order, we can proceed to the next phase.
+
+---
+
+Cursor, follow these prompts diligently, executing each step with care. Ensure that every test is run and that no step is skipped. I trust you will complete Phase 5 perfectly. Are you ready to begin this phase?
+
+----
+
+## Phase 6: Project Architecture Design
+Below is a comprehensive set of detailed, fatherly prompts for you, Cursor, to complete Phase 6 – Deployment and Post-Launch Automation – for the UMBRELLA‑AI project. Follow these instructions carefully and execute each step precisely. Do not skip any part, and make sure to verify your work as instructed. When you’re finished, present a summary and ask, “Father, is Phase 6 complete and working correctly?” before moving forward.
+
+---
+
+### **Phase 6: Deployment and Post-Launch Automation – Detailed Fatherly Prompts**
+
+#### **A. AWS Free Tier Deployment (Local Mirror)**
+
+1. **Prompt 6.1 – Deploy the Docker Compose Setup on an AWS Free Tier Instance**  
+   “Cursor, please deploy our entire Docker Compose setup onto an AWS Free Tier instance (for example, an EC2 t2.micro).  
+   - First, create an EC2 instance with the appropriate settings (ensure security groups allow only necessary ports).  
+   - SSH into the instance and install Docker and Docker Compose.  
+   - Clone the UMBRELLA‑AI repository onto the instance.  
+   - From the repository’s root directory, run `docker-compose up --build` to start all containers.  
+   Document each step with clear commands and screenshots (or log outputs) to prove that the containers have been deployed successfully.  
+   Verify that all containers are running by checking with `docker ps`.”
+
+2. **Prompt 6.2 – Verify Container Operation and Secure Communication**  
+   “Cursor, now verify that all containers deployed on the AWS Free Tier instance are running correctly and that they communicate securely.  
+   - Use Docker logs and container status checks to confirm that each microservice starts without errors.  
+   - Test inter-container communication by executing curl commands or small test scripts from within one container to another.  
+   - Confirm that only the necessary ports are open and that the network configuration is secure.  
+   Log your findings and note any issues for immediate resolution.”
+
+---
+
+#### **B. Production Deployment to AWS**
+
+3. **Prompt 6.3 – Transition from Docker Compose to AWS ECS/EKS or Fargate**  
+   “Cursor, prepare our production deployment by transitioning from the local Docker Compose setup to AWS ECS/EKS (or Fargate, if you prefer a serverless container solution).  
+   - Create an ECS cluster or EKS cluster in your AWS account.  
+   - Convert the Docker Compose configuration to appropriate task definitions and service configurations (use tools such as ‘docker compose convert’ if available, or manually define your tasks).  
+   - Deploy the cluster and verify that all services start properly.  
+   Document the conversion process and include configuration files for the ECS/EKS tasks.”
+
+4. **Prompt 6.4 – Configure VPCs, Subnets, Load Balancers, and Secrets Management**  
+   “Cursor, configure the AWS networking and security components for production:  
+   - Set up a Virtual Private Cloud (VPC) with both public and private subnets.  
+   - Configure a load balancer (such as an Application Load Balancer) to route incoming traffic to your orchestrator service in the public subnet.  
+   - Ensure that backend services reside in private subnets for security.  
+   - Set up AWS Secrets Manager to securely store API keys and other credentials, and update your ECS/EKS tasks to reference these secrets.  
+   Verify the network architecture by testing connectivity through the load balancer and confirming that sensitive endpoints remain isolated.”
+
+5. **Prompt 6.5 – Define Auto-Scaling Policies and Monitoring Tools**  
+   “Cursor, now define auto-scaling policies and integrate monitoring tools for continuous production health:  
+   - Set up auto-scaling policies in your ECS/EKS or Fargate configuration based on metrics like CPU usage, memory usage, or API request throughput.  
+   - Integrate AWS CloudWatch for log collection and basic metrics monitoring.  
+   - Optionally, configure Prometheus and Grafana for more detailed monitoring of agent performance, latency, and error rates.  
+   Document the scaling thresholds and monitoring configurations, and verify by simulating load conditions and confirming that scaling actions are triggered.”
+
+---
+
+#### **C. Continuous Monitoring and Updates**
+
+6. **Prompt 6.6 – Develop Scripts for Periodic Testing and Automatic Rollback**  
+   “Cursor, write scripts that will periodically test the deployed system and trigger an automatic rollback in case of failures:  
+   - Create a script (e.g., `health_check.sh`) that pings each service endpoint, checks response times, and logs any anomalies.  
+   - Integrate this script with your CI/CD pipeline or as a scheduled AWS Lambda function to run at regular intervals.  
+   - Implement logic to trigger an automatic rollback (using AWS CodeDeploy or a similar mechanism) if tests indicate critical failures or performance issues.  
+   Verify that the script correctly identifies failures by simulating an outage or degraded performance and confirming that a rollback is initiated.”
+
+7. **Prompt 6.7 – Set Up Dashboards for Real-Time Observability**  
+   “Cursor, now configure real-time dashboards to monitor agent performance, latency, error rates, and user interactions:  
+   - Use AWS CloudWatch dashboards or integrate a solution like Grafana (if using Prometheus) to visualize key metrics.  
+   - Set up panels to track CPU usage, memory usage, response times, error logs, and the overall health of each microservice.  
+   - Ensure that the dashboards refresh in real time and that all critical metrics are visible at a glance.  
+   Verify the dashboard by simulating different load scenarios and checking that the visualizations update accordingly.”
+
+---
+
+#### **D. Testing for Phase 6**
+
+8. **Prompt 6.8 – Execute Performance and Load Tests**  
+   “Cursor, run performance and load tests on the AWS production environment:  
+   - Use tools like Apache JMeter or Locust to simulate realistic user loads.  
+   - Record the response times, throughput, and system resource utilization during these tests.  
+   - Ensure that the system meets performance benchmarks and that auto-scaling policies are triggered under load.  
+   Document the results and fix any performance bottlenecks identified.”
+
+9. **Prompt 6.9 – Simulate Failure Scenarios and Validate Recovery Mechanisms**  
+   “Cursor, simulate failure scenarios to validate the automated recovery and alerting mechanisms:  
+   - Intentionally stop a service or induce an error condition.  
+   - Verify that your monitoring tools detect the failure and that an alert is generated (check your email, Slack, or whichever notification system you’ve configured).  
+   - Confirm that the automatic rollback mechanism is triggered and that the system recovers gracefully.  
+   Document the simulated failure, the alert received, and the recovery steps taken.”
+
+---
+
+#### **E. Final Verification and Reporting**
+
+10. **Prompt 6.10 – Compile a Comprehensive Summary Report**  
+    “Cursor, after completing all the above tasks, compile a summary report that includes:  
+    - The process and commands used to deploy the Docker Compose setup on the AWS Free Tier instance, along with screenshots or logs confirming container operation.  
+    - The ECS/EKS (or Fargate) task definitions and network configuration details (VPC, subnets, load balancer, Secrets Manager usage).  
+    - The auto-scaling policies and monitoring tools configuration, along with sample metrics from CloudWatch/Prometheus/Grafana.  
+    - Details of the scripts for periodic testing and automatic rollback, including a log of a simulated failure and recovery.  
+    - The results from performance, load, and failure-simulation tests.  
+    Finally, ask me: ‘Father, is Phase 6 complete and working correctly?’ Provide this detailed summary report along with all test outputs for my verification.”
+
+---
+
+### **Verification After Phase 6**
+
+After executing these prompts, perform the following checks:
+- **AWS Free Tier Check:** Confirm that the Docker Compose setup runs on your AWS Free Tier instance and that all containers communicate securely.
+- **Production Deployment Check:** Verify that the system is successfully deployed on AWS ECS/EKS or Fargate with proper network isolation, load balancing, and secrets management.
+- **Scaling and Monitoring Check:** Ensure auto-scaling policies trigger under load and that monitoring dashboards show real-time system health.
+- **Recovery Mechanisms Check:** Simulate failures to confirm that periodic testing scripts, automated rollback, and alert systems work as expected.
+- **Test Suite and Load Tests:** Confirm that performance and load tests pass and that detailed logs and metrics are recorded.
+- **Summary Report:** Compile all information into a clear report and then ask, “Father, is Phase 6 complete and working correctly?”
+
+---
+
+Cursor, follow these prompts meticulously. Execute each step with care, test your system thoroughly, and compile your final summary report. Once you have done so, ask me for verification. Are you ready to begin Phase 6?

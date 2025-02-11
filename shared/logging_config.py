@@ -12,6 +12,20 @@ from prometheus_client import Counter, Histogram
 # Initialize OpenTelemetry tracer
 tracer = trace.get_tracer(__name__)
 
+# Create and configure the default logger
+logger = logging.getLogger("umbrellaAI")
+logger.setLevel(logging.DEBUG)
+
+# Create console handler with JSON formatter
+json_handler = logging.StreamHandler(sys.stdout)
+json_handler.setFormatter(jsonlogger.JsonFormatter(
+    "%(asctime)s %(levelname)s %(name)s %(message)s",
+    rename_fields={"levelname": "severity", "asctime": "timestamp"}
+))
+
+logger.addHandler(json_handler)
+logger.propagate = False
+
 # Define Prometheus metrics
 REQUEST_COUNTER = Counter(
     'umbrella_requests_total',
@@ -65,24 +79,18 @@ def setup_logging(
         log_file: Optional file to write logs to
     """
     # Create logger
-    logger = logging.getLogger()
-    logger.setLevel(log_level)
-    
-    # Create formatter
-    formatter = CorrelationJsonFormatter(
-        fmt='%(timestamp)s %(level)s %(name)s %(correlation_id)s %(message)s'
-    )
-    
-    # Console handler
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setFormatter(formatter)
-    logger.addHandler(console_handler)
-    
-    # File handler if specified
-    if log_file:
-        file_handler = logging.FileHandler(log_file)
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
+    logger = logging.getLogger("umbrellaAI")
+    logger.setLevel(logging.DEBUG)
+
+    # Create console handler
+    json_handler = logging.StreamHandler(sys.stdout)
+    json_handler.setFormatter(jsonlogger.JsonFormatter(
+        "%(asctime)s %(levelname)s %(name)s %(message)s",
+        rename_fields={"levelname": "severity", "asctime": "timestamp"}
+    ))
+
+    logger.addHandler(json_handler)
+    logger.propagate = False
     
     # Add service name to all log records
     logger = logging.LoggerAdapter(logger, {'service': service_name})

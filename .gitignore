@@ -22,41 +22,54 @@ wheels/
 
 # Virtual Environment
 venv/
-ENV/
 env/
+ENV/
 .env
 .venv
-test_env/
+.python-version
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
-.project
-.pydevproject
-.settings
+*~
+
+# Testing
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.tox/
+nosetests.xml
+coverage/
+.coverage.*
+reports/
+
+# Logs
+*.log
+logs/
+log/
+
+# Data
+data/
+*.db
+*.sqlite3
+*.pdf
+uploads/
 
 # Docker
 .docker/
 docker-compose.override.yml
 
-# Logs and databases
-*.log
-*.sqlite
-*.db
-logs/
-test-reports/
-
-# Coverage reports
-htmlcov/
-.coverage
-.coverage.*
-coverage.xml
-*.cover
+# Temporary files
+*.tmp
+*.bak
+*.swp
+.DS_Store
+Thumbs.db
 
 # Misc
-.DS_Store
 .env.local
 .env.development.local
 .env.test.local
@@ -71,7 +84,6 @@ yarn-debug.log*
 yarn-error.log*
 
 # Test cache
-.pytest_cache/
 .hypothesis/
 
 # Distribution
@@ -82,15 +94,9 @@ build/
 *.local
 local_settings.py
 
-# Virtual Environment
-.python-version
-
 # IDE specific files
 *.swp
 *.swo
-
-# Test coverage
-nosetests.xml
 
 # AWS
 .aws/
@@ -104,6 +110,12 @@ credentials.json
 # Build and Documentation
 docs/_build/
 site/
+
+# Virtual Environment
+test_env/
+
+# Test coverage
+*.cover
 
 # Temporary files
 *.tmp

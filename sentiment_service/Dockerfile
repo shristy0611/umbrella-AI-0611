@@ -11,6 +11,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy source code
 COPY . .
 
+# Create non-root user
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+
 # Create and configure healthcheck script
 RUN echo '#!/bin/bash\n\
 response=$(curl -s -w "%{http_code}" http://0.0.0.0:8002/health -o /dev/null)\n\

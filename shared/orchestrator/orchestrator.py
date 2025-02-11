@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from shared.base_service import BaseService
-from src.orchestrator.task_decomposer import DynamicTaskDecomposer, TaskDecomposition
+from src.task_decomposer import DynamicTaskDecomposer, TaskDecomposition
 
 @dataclass
 class TaskStatus:
